@@ -65,7 +65,7 @@ SEASON = 2026
 # בהרצה אוטומטית (GitHub Actions) זה נשלט ע"י משתנה הסביבה FETCH_ALL_PLAYERS,
 # כדי שריצות התזמון האוטומטיות התכופות לא "יבזבזו" את המכסה על סגלים
 # שכמעט ואינם משתנים, ורק הרצה ידנית תמשוך אותם מחדש כשבאמת רוצים.
-FETCH_ALL_PLAYERS = os.environ.get("FETCH_ALL_PLAYERS", "true").lower() == "true"
+FETCH_ALL_PLAYERS = os.environ.get("FETCH_ALL_PLAYERS", "false").lower() == "true"
 REQUEST_DELAY_SECONDS = 0.7  # הפסקה קטנה בין קריאות כדי לא לפגוע במגבלת קצב
 
 TEMPLATE_FILE = "template.html"
@@ -328,4 +328,7 @@ if __name__ == "__main__":
     finally:
         # שורה זו חשובה בעיקר כשמריצים בלחיצה כפולה (למשל את קובץ ה-exe) -
         # בלעדיה החלון היה נפתח ונסגר מיד לפני שאפשר לקרוא את הפלט.
-        input("\nלחץ Enter כדי לסגור את החלון...")
+        # sys.stdin.isatty() בודק שיש מקלדת אמיתית מחוברת; ב-GitHub Actions
+        # (וכל הרצה אוטומטית אחרת) אין קלט בכלל, אז מדלגים על זה כדי לא לקרוס.
+        if sys.stdin.isatty():
+            input("\nלחץ Enter כדי לסגור את החלון...")
