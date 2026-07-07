@@ -1,0 +1,50 @@
+name: Update World Cup Data
+
+# Runs automatically once an hour (cheap: standings + matches + top scorers,
+# about 3 API calls total - safely within the free daily quota).
+# Also runnable manually any time from the Actions tab, with an option to
+# also refresh the full 48-team player squads (a heavier ~49-call fetch that
+# doesn't need to happen every hour, since rosters barely change).
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      fetch_all_players:
+        description: 'Also fetch full player squads (uses ~49 extra API calls)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run fetch script
+        env:
+          FOOTBALL_DATA_KEY: ${{ secrets.FOOTBALL_DATA_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          OUTPUT_FILE: index.html
+          FETCH_ALL_PLAYERS: ${{ github.event_name == 'workflow_dispatch' && inputs.fetch_all_players || 'false' }}
+        run: python fetch_worldcup.py
+
+      - name: Commit and push if the site changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --quiet && git diff --cached --quiet || git commit -m "Auto-update World Cup data"
+          git push
