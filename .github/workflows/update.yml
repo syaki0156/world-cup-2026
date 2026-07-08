@@ -1,13 +1,13 @@
 name: Update World Cup Data
 
-# Runs automatically once an hour (cheap: standings + matches + top scorers,
+# Runs automatically every 3 hours (cheap: standings + matches + top scorers,
 # about 3 API calls total - safely within the free daily quota).
 # Also runnable manually any time from the Actions tab, with an option to
 # also refresh the full 48-team player squads (a heavier ~49-call fetch that
-# doesn't need to happen every hour, since rosters barely change).
+# doesn't need to happen every run, since rosters barely change).
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 */3 * * *'
   workflow_dispatch:
     inputs:
       fetch_all_players:
@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
