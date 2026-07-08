@@ -207,11 +207,13 @@
   <div id="content"></div>
 
   <footer>
-    תמונת מצב שנוצרה על ידי fetch_worldcup.py. הרץ את הסקריפט שוב בכל פעם שתרצה נתונים טריים.
+    עודכן לאחרונה: <span id="lastUpdated">—</span><br>
+    תמונת מצב שנוצרה על ידי fetch_worldcup.py. הרץ את הסקריפט שוב (או חכה לעדכון האוטומטי) בכל פעם שתרצה נתונים טריים.
   </footer>
 </div>
 
 <script>
+const UPDATED_AT = "08.07.2026 15:05 UTC";
 // ---------- נתוני הטורניר (תמונת מצב אמיתית, 3.7.2026) ----------
 const teamsHe = {
   "Mexico":"מקסיקו","South Africa":"דרום אפריקה","Korea Republic":"קוריאה הדרומית","Czechia":"צ'כיה",
@@ -739,6 +741,7 @@ document.querySelectorAll('#mainNav button').forEach(btn=>{
 document.title = `מונדיאל ${SEASON} — לוח נתונים`;
 document.getElementById('seasonFull').textContent = SEASON;
 document.getElementById('seasonShort').textContent = String(SEASON).slice(-2);
+document.getElementById('lastUpdated').textContent = UPDATED_AT || '—';
 
 function unknownTeamsFootnote(list){
   const hasUnknown = list.some(g=>!g.home || !g.away);
