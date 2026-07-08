@@ -213,7 +213,7 @@
 </div>
 
 <script>
-const UPDATED_AT = /*__UPDATED__*/""/*__UPDATED__*/;
+const UPDATED_AT = "3 ביולי 2026 (תמונת מצב ידנית - לא דרך האוטומציה)";
 // ---------- נתוני הטורניר (תמונת מצב אמיתית, 3.7.2026) ----------
 const teamsHe = {
   "Mexico":"מקסיקו","South Africa":"דרום אפריקה","Korea Republic":"קוריאה הדרומית","Czechia":"צ'כיה",
@@ -229,10 +229,6 @@ const teamsHe = {
   "Colombia":"קולומביה","Portugal":"פורטוגל","Congo DR":"קונגו (הרפ' הדמוקרטית)","Uzbekistan":"אוזבקיסטן",
   "England":"אנגליה","Croatia":"קרואטיה","Ghana":"גאנה","Panama":"פנמה","W83":"מנצחת/ת שמינית גמר 83"
 };
-// football-data.org לפעמים משתמש בשם אחר מזה שיש לנו כמפתח (למשל "United
-// States" במקום "USA"). הטבלה הזו ממפה כל כינוי ידוע לשם הקאנוני שמשמש
-// כמפתח ב-teamsHe וב-teamFlags, כך שהתרגום והדגל יעבדו לא משנה איזו גרסה
-// של השם מגיעה מה-API.
 const teamAliases = {
   "United States": "USA", "United States of America": "USA",
   "South Korea": "Korea Republic", "Korea, South": "Korea Republic", "Korea, Republic of": "Korea Republic",
@@ -257,7 +253,7 @@ function he(name){
   return teamsHe[key] || name;
 }
 
-const SEASON = /*__SEASON__*/2026/*__SEASON__*/;
+const SEASON = 2026;
 
 const teamFlags = {
   "Mexico":"mx","South Africa":"za","Korea Republic":"kr","Czechia":"cz",
@@ -278,8 +274,6 @@ function flagImg(name, size){
   size = size || 18;
   const code = teamFlags[canonicalTeam(name)];
   if(!code) return '';
-  // flagcdn.com רק תומך בקבוצות רוחב קבועות: w20/w40/w80/w160/w320/w640/w1280/w2560.
-  // בקשת גודל אחר (כמו w18) מחזירה 404 - זו הייתה הסיבה שהדגלים לא הופיעו בכלל.
   const buckets = [20,40,80,160,320,640,1280,2560];
   const srcWidth = buckets.find(b=>b>=size) || 2560;
   return `<img src="https://flagcdn.com/w${srcWidth}/${code}.png" alt="" loading="lazy"
@@ -287,11 +281,46 @@ function flagImg(name, size){
     onerror="this.style.display='none';">`;
 }
 
-const standings = /*__STANDINGS__*/[]/*__STANDINGS__*/;
+const standings = [
+{"rank":1,"team":"Mexico","w":3,"l":0,"d":0,"pts":9,"group":"A"},{"rank":2,"team":"South Africa","w":1,"l":1,"d":1,"pts":4,"group":"A"},{"rank":3,"team":"Korea Republic","w":1,"l":2,"d":0,"pts":3,"group":"A"},{"rank":4,"team":"Czechia","w":0,"l":2,"d":1,"pts":1,"group":"A"},
+{"rank":1,"team":"Switzerland","w":2,"l":0,"d":1,"pts":7,"group":"B"},{"rank":2,"team":"Canada","w":1,"l":1,"d":1,"pts":4,"group":"B"},{"rank":3,"team":"Bosnia and Herzegovina","w":1,"l":1,"d":1,"pts":4,"group":"B"},{"rank":4,"team":"Qatar","w":0,"l":2,"d":1,"pts":1,"group":"B"},
+{"rank":1,"team":"Brazil","w":2,"l":0,"d":1,"pts":7,"group":"C"},{"rank":2,"team":"Morocco","w":2,"l":0,"d":1,"pts":7,"group":"C"},{"rank":3,"team":"Scotland","w":1,"l":2,"d":0,"pts":3,"group":"C"},{"rank":4,"team":"Haiti","w":0,"l":3,"d":0,"pts":0,"group":"C"},
+{"rank":1,"team":"USA","w":2,"l":1,"d":0,"pts":6,"group":"D"},{"rank":2,"team":"Australia","w":1,"l":1,"d":1,"pts":4,"group":"D"},{"rank":3,"team":"Paraguay","w":1,"l":1,"d":1,"pts":4,"group":"D"},{"rank":4,"team":"Turkiye","w":1,"l":2,"d":0,"pts":3,"group":"D"},
+{"rank":1,"team":"Germany","w":2,"l":1,"d":0,"pts":6,"group":"E"},{"rank":2,"team":"Ivory Coast","w":2,"l":1,"d":0,"pts":6,"group":"E"},{"rank":3,"team":"Ecuador","w":1,"l":1,"d":1,"pts":4,"group":"E"},{"rank":4,"team":"Curacao","w":0,"l":2,"d":1,"pts":1,"group":"E"},
+{"rank":1,"team":"Netherlands","w":2,"l":0,"d":1,"pts":7,"group":"F"},{"rank":2,"team":"Japan","w":1,"l":0,"d":2,"pts":5,"group":"F"},{"rank":3,"team":"Sweden","w":1,"l":1,"d":1,"pts":4,"group":"F"},{"rank":4,"team":"Tunisia","w":0,"l":3,"d":0,"pts":0,"group":"F"},
+{"rank":1,"team":"Belgium","w":1,"l":0,"d":2,"pts":5,"group":"G"},{"rank":2,"team":"Egypt","w":1,"l":0,"d":2,"pts":5,"group":"G"},{"rank":3,"team":"IR Iran","w":0,"l":0,"d":3,"pts":3,"group":"G"},{"rank":4,"team":"New Zealand","w":0,"l":2,"d":1,"pts":1,"group":"G"},
+{"rank":1,"team":"Spain","w":2,"l":0,"d":1,"pts":7,"group":"H"},{"rank":2,"team":"Cape Verde","w":0,"l":0,"d":3,"pts":3,"group":"H"},{"rank":3,"team":"Uruguay","w":0,"l":1,"d":2,"pts":2,"group":"H"},{"rank":4,"team":"Saudi Arabia","w":0,"l":1,"d":2,"pts":2,"group":"H"},
+{"rank":1,"team":"France","w":3,"l":0,"d":0,"pts":9,"group":"I"},{"rank":2,"team":"Norway","w":2,"l":1,"d":0,"pts":6,"group":"I"},{"rank":3,"team":"Senegal","w":1,"l":2,"d":0,"pts":3,"group":"I"},{"rank":4,"team":"Iraq","w":0,"l":3,"d":0,"pts":0,"group":"I"},
+{"rank":1,"team":"Argentina","w":3,"l":0,"d":0,"pts":9,"group":"J"},{"rank":2,"team":"Austria","w":1,"l":1,"d":1,"pts":4,"group":"J"},{"rank":3,"team":"Algeria","w":1,"l":1,"d":1,"pts":4,"group":"J"},{"rank":4,"team":"Jordan","w":0,"l":3,"d":0,"pts":0,"group":"J"},
+{"rank":1,"team":"Colombia","w":2,"l":0,"d":1,"pts":7,"group":"K"},{"rank":2,"team":"Portugal","w":1,"l":0,"d":2,"pts":5,"group":"K"},{"rank":3,"team":"Congo DR","w":1,"l":1,"d":1,"pts":4,"group":"K"},{"rank":4,"team":"Uzbekistan","w":0,"l":3,"d":0,"pts":0,"group":"K"},
+{"rank":1,"team":"England","w":2,"l":0,"d":1,"pts":7,"group":"L"},{"rank":2,"team":"Croatia","w":2,"l":1,"d":0,"pts":6,"group":"L"},{"rank":3,"team":"Ghana","w":1,"l":1,"d":1,"pts":4,"group":"L"},{"rank":4,"team":"Panama","w":0,"l":3,"d":0,"pts":0,"group":"L"}
+];
 
-const games = /*__GAMES__*/[]/*__GAMES__*/;
-const scorers = /*__SCORERS__*/[]/*__SCORERS__*/;
-const allPlayers = /*__ALLPLAYERS__*/[]/*__ALLPLAYERS__*/;
+const games = [
+{"status":"in_progress","home":"Portugal","away":"Croatia","hs":0,"as":0,"local":"שישי, 3.7 · 02:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Brazil","away":"Japan","hs":2,"as":1,"local":"שני, 29.6 · 20:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Germany","away":"Paraguay","hs":1,"as":1,"local":"שני, 29.6 · 23:30","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Netherlands","away":"Morocco","hs":1,"as":1,"local":"שלישי, 30.6 · 04:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Ivory Coast","away":"Norway","hs":1,"as":2,"local":"שלישי, 30.6 · 20:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"France","away":"Sweden","hs":3,"as":0,"local":"רביעי, 1.7 · 00:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Mexico","away":"Ecuador","hs":2,"as":0,"local":"רביעי, 1.7 · 05:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"England","away":"Congo DR","hs":2,"as":1,"local":"רביעי, 1.7 · 19:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Belgium","away":"Senegal","hs":3,"as":2,"local":"רביעי, 1.7 · 23:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"USA","away":"Bosnia and Herzegovina","hs":2,"as":0,"local":"חמישי, 2.7 · 03:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"final","home":"Spain","away":"Austria","hs":3,"as":0,"local":"חמישי, 2.7 · 22:00","stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Switzerland","away":"Algeria","local":"שישי, 3.7 · 06:00","p":{"h":48,"d":29.2,"a":22.8},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Australia","away":"Egypt","local":"שישי, 3.7 · 21:00","p":{"h":28.5,"d":33.1,"a":38.4},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Argentina","away":"Cape Verde","local":"שבת, 4.7 · 01:00","p":{"h":84,"d":11.6,"a":4.4},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Colombia","away":"Ghana","local":"שבת, 4.7 · 04:30","p":{"h":68.2,"d":20.9,"a":10.9},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Canada","away":"Morocco","local":"שבת, 4.7 · 20:00","p":{"h":18.9,"d":27.2,"a":53.9},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Paraguay","away":"France","local":"ראשון, 5.7 · 00:00","p":{"h":5.5,"d":12.5,"a":82},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Brazil","away":"Norway","local":"ראשון, 5.7 · 23:00","p":{"h":50.6,"d":26,"a":23.4},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"Mexico","away":"England","local":"שני, 6.7 · 03:00","p":{"h":30.3,"d":30.1,"a":39.6},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"},
+{"status":"scheduled","home":"USA","away":"Belgium","local":"שלישי, 7.7 · 03:00","p":{"h":36.5,"d":27.6,"a":35.9},"stage":"GROUP_STAGE","stageLabel":"שלב הבתים"}
+];
+
+const scorers = []; // ריק בתמונת המצב הזו - יתמלא אוטומטית בהרצה עם מפתח api-sports.io תקין
+const allPlayers = []; // ריק בתמונת המצב הזו - יתמלא אוטומטית בהרצה עם FETCH_ALL_PLAYERS=True
 
 // ---------- רינדור ----------
 const groups = [...new Set(standings.map(s=>s.group))].sort();

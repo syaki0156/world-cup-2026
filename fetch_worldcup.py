@@ -34,6 +34,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timezone
 import requests
 
 
@@ -254,12 +255,16 @@ def build_html(standings, games, scorers, all_players):
     with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
         template = f.read()
 
+    now = datetime.now(timezone.utc)
+    updated_str = now.strftime("%d.%m.%Y %H:%M UTC")
+
     replacements = {
         "/*__STANDINGS__*/[]/*__STANDINGS__*/": json.dumps(standings, ensure_ascii=False),
         "/*__GAMES__*/[]/*__GAMES__*/": json.dumps(games, ensure_ascii=False),
         "/*__SCORERS__*/[]/*__SCORERS__*/": json.dumps(scorers, ensure_ascii=False),
         "/*__ALLPLAYERS__*/[]/*__ALLPLAYERS__*/": json.dumps(all_players, ensure_ascii=False),
         "/*__SEASON__*/2026/*__SEASON__*/": json.dumps(SEASON),
+        "/*__UPDATED__*/\"\"/*__UPDATED__*/": json.dumps(updated_str),
     }
     html = template
     for marker, value in replacements.items():
