@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מונדיאל 2026 — לוח נתונים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=Heebo:wght@300;400;500;700&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0d2a20;
+    --bg2: #0a2119;
+    --panel: #123a2c;
+    --panel-line: rgba(243,239,228,0.10);
+    --gold: #d4af37;
+    --gold-soft: #e8c766;
+    --cream: #f3efe4;
+    --dim: #9fbcac;
+    --dim2: #6f9382;
+    --live: #e0533b;
+    --win: #4caf7d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.02) 0 46px, rgba(0,0,0,0.025) 46px 92px),
+      radial-gradient(ellipse at top, var(--bg2), #071912 70%);
+    color: var(--cream);
+    font-family:'Heebo', sans-serif;
+    min-height:100vh;
+  }
+  .pitch-lines{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.05;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 78px, var(--cream) 78px 79px),
+      repeating-linear-gradient(90deg, transparent 0 78px, var(--cream) 78px 79px);
+  }
+  .wrap{position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:28px 20px 60px;}
+
+  header{ position:relative; text-align:center; padding: 18px 0 26px; }
+  header::before{
+    content:''; position:absolute; inset:-30px -20px auto -20px; height:240px; z-index:-1;
+    background: radial-gradient(ellipse at 50% 0%, rgba(232,199,102,0.14), transparent 68%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'Roboto Mono', monospace; letter-spacing:2px; font-size:12px;
+    color: var(--gold-soft); text-transform:uppercase;
+  }
+  h1{
+    font-family:'Rubik', sans-serif; font-weight:900; font-size:44px; margin:6px 0 4px;
+    background: linear-gradient(180deg, var(--cream), var(--gold-soft));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    letter-spacing:-1px;
+  }
+  .sub{ color:var(--dim); font-size:14px; }
+
+  .ticker{
+    display:flex; align-items:center; gap:10px; justify-content:center;
+    background:
+      radial-gradient(circle at 15% -20%, rgba(232,199,102,0.16), transparent 55%),
+      radial-gradient(circle at 85% 120%, rgba(76,175,125,0.14), transparent 55%),
+      var(--panel);
+    border:1px solid var(--panel-line); border-radius:999px;
+    padding:8px 18px; margin:18px auto 0; max-width:520px; font-family:'Roboto Mono', monospace; font-size:13px;
+  }
+  .dot{ width:8px; height:8px; border-radius:50%; background:var(--live); animation: pulse 1.4s infinite; flex-shrink:0;}
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+  .ticker b{ color:var(--gold-soft); font-weight:600;}
+
+  nav{
+    display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+    margin: 26px 0 22px; border-bottom:1px solid var(--panel-line); padding-bottom:18px;
+  }
+  nav button{
+    font-family:'Heebo',sans-serif; font-weight:500; font-size:14.5px;
+    background: transparent; color: var(--dim); border:1px solid var(--panel-line);
+    padding:9px 18px; border-radius:999px; cursor:pointer; transition: all .15s ease;
+  }
+  nav button:hover{ color:var(--cream); border-color: var(--gold-soft); }
+  nav button.active{ background: var(--gold); color:#0d2a20; border-color:var(--gold); font-weight:700; }
+
+  .group-select{
+    display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:18px;
+  }
+  .group-select button{
+    font-family:'Roboto Mono',monospace; font-size:12.5px; width:34px; height:34px; border-radius:8px;
+    background: var(--panel); color:var(--dim); border:1px solid var(--panel-line); cursor:pointer;
+  }
+  .group-select button.active{ background:var(--gold); color:#0d2a20; border-color:var(--gold); font-weight:700;}
+
+  .stage-select{
+    display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:18px;
+  }
+  .stage-select button{
+    font-family:'Heebo',sans-serif; font-size:12.5px; padding:7px 14px; border-radius:999px;
+    background: var(--panel); color:var(--dim); border:1px solid var(--panel-line); cursor:pointer;
+  }
+  .stage-select button.active{ background:var(--gold); color:#0d2a20; border-color:var(--gold); font-weight:700; }
+
+  .panel{
+    background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.022) 0 34px, rgba(0,0,0,0.03) 34px 68px),
+      var(--panel);
+    border:1px solid var(--panel-line); border-radius:16px;
+    padding: 22px; margin-bottom: 18px;
+  }
+  .panel h2{
+    font-family:'Rubik',sans-serif; font-size:19px; margin:0 0 4px; color:var(--gold-soft);
+  }
+  .panel .desc{ color:var(--dim); font-size:13px; margin-bottom:16px;}
+  .panel-header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:12px; flex-wrap:wrap; margin-bottom: 16px;
+  }
+  .panel-header h2{ margin:0 0 4px; }
+  .panel-header .desc{ margin-bottom:0; }
+  .sort-toggle{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--dim);
+    cursor:pointer; white-space:nowrap; user-select:none; padding-top:2px;
+  }
+  .sort-toggle input{ accent-color:var(--gold); cursor:pointer; width:15px; height:15px; }
+  .sort-toggle:hover{ color:var(--cream); }
+
+  .team-select{
+    width:100%; max-width:420px; background: var(--bg2); color:var(--cream);
+    border:1px solid var(--panel-line); border-radius:10px; padding:11px 14px;
+    font-family:'Heebo',sans-serif; font-size:15px; font-weight:500; cursor:pointer;
+  }
+  .team-select:focus{ outline:none; border-color:var(--gold-soft); }
+
+  .stat-grid{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:22px;
+  }
+  .stat-box{
+    background: var(--bg2); border:1px solid var(--panel-line); border-radius:10px;
+    padding:14px 8px; text-align:center;
+  }
+  .stat-box.gold{ border-color: var(--gold); background: rgba(212,175,55,0.08); }
+  .stat-num{ font-family:'Roboto Mono',monospace; font-weight:700; font-size:22px; color:var(--cream); }
+  .stat-box.gold .stat-num{ color: var(--gold-soft); }
+  .stat-label{ font-size:11px; color:var(--dim); margin-top:4px; }
+  @media(max-width:640px){
+    .stat-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .clickable-row{ cursor:pointer; }
+  td[data-team]{ cursor:pointer; }
+  td[data-team]:hover{ text-decoration: underline; text-decoration-color: var(--gold-soft); text-underline-offset:3px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; z-index:1000; padding:24px;
+    background: rgba(4,12,9,0.72); backdrop-filter: blur(3px);
+    display:none; align-items:center; justify-content:center;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    position:relative; background: var(--panel);
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.022) 0 34px, rgba(0,0,0,0.03) 34px 68px);
+    border:1px solid var(--panel-line); border-radius:18px;
+    max-width:640px; width:100%; max-height:85vh; overflow-y:auto; padding:26px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    animation: modalIn .16s ease-out;
+  }
+  .modal-box .panel{ margin-bottom:0; border:none; padding:0; background:none; }
+  @keyframes modalIn{ from{ opacity:0; transform:translateY(10px) scale(.97);} to{ opacity:1; transform:none;} }
+  .modal-close{
+    position:absolute; top:14px; left:14px; z-index:1;
+    width:32px; height:32px; border-radius:50%;
+    background: var(--bg2); border:1px solid var(--panel-line); color:var(--dim);
+    font-size:15px; cursor:pointer; line-height:1;
+  }
+  .modal-close:hover{ color:var(--cream); border-color:var(--gold-soft); }
+
+  .match-hero{ display:flex; align-items:center; justify-content:center; gap:18px; padding:10px 0 20px; text-align:center; }
+  .match-hero .side{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .match-hero .side img{ width:52px; height:auto; border-radius:4px; box-shadow:0 0 0 1px rgba(255,255,255,.12); }
+  .match-hero .side .name{ font-family:'Rubik',sans-serif; font-weight:700; font-size:15px; }
+  .match-hero .mid{ min-width:110px; }
+  .match-hero .mid .score{ font-size:30px; }
+  .match-hero .mid .vs{ font-family:'Roboto Mono',monospace; color:var(--dim2); font-size:13px; }
+
+  .player-hero{ display:flex; align-items:center; gap:16px; padding-bottom:18px; }
+  .player-hero img{ width:64px; height:64px; border-radius:50%; object-fit:cover; background:var(--bg2); box-shadow:0 0 0 1px rgba(255,255,255,.12); }
+  .player-hero h2{ margin:0 0 4px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  thead th{
+    text-align:right; font-family:'Roboto Mono',monospace; font-weight:600; font-size:11.5px;
+    color: var(--dim2); text-transform:uppercase; letter-spacing:.5px;
+    padding: 8px 10px; border-bottom:1px solid var(--panel-line);
+  }
+  thead th.num, td.num{ text-align:center; }
+  tbody td{ padding:10px 10px; border-bottom:1px solid rgba(243,239,228,0.05); }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background: rgba(212,175,55,0.06); }
+  tr.live-row{
+    background: linear-gradient(90deg, rgba(224,83,59,0.10), rgba(224,83,59,0.02) 65%);
+  }
+  tr.live-row:hover{ background: linear-gradient(90deg, rgba(224,83,59,0.15), rgba(212,175,55,0.06) 65%); }
+  td.team{ font-weight:500; }
+  td.rank1{ color: var(--gold-soft); font-weight:700; }
+  .badge{
+    display:inline-block; font-family:'Roboto Mono',monospace; font-size:11px; font-weight:600;
+    padding:2px 8px; border-radius:6px; background:rgba(76,175,125,0.15); color:var(--win);
+  }
+  .score{ font-family:'Roboto Mono',monospace; font-weight:700; font-size:15px; display:inline-block; }
+  .prob-bar{ display:flex; height:8px; border-radius:4px; overflow:hidden; width:140px; background:#0d2a20; }
+  .prob-bar span{ height:100%; }
+  .status-live{ color:var(--live); font-family:'Roboto Mono',monospace; font-size:11px; font-weight:700; }
+  .status-final{ color:var(--dim2); font-family:'Roboto Mono',monospace; font-size:11px; }
+  .status-sched{ color:var(--dim); font-family:'Roboto Mono',monospace; font-size:11px; }
+
+  footer{ text-align:center; color:var(--dim2); font-size:12px; margin-top:30px; line-height:1.8; }
+  footer a{ color:var(--gold-soft); }
+
+  @media(max-width:640px){
+    h1{font-size:32px;}
+    thead th, tbody td{padding:8px 5px; font-size:12.5px;}
+    .prob-bar{width:90px;}
+  }
+</style>
+</head>
+<body>
+<div class="pitch-lines"></div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">FIFA WORLD CUP · <span id="seasonShort">26</span> · ⚽</div>
+    <h1>מונדיאל <span id="seasonFull">2026</span></h1>
+    <div class="sub">ארה״ב · קנדה · מקסיקו — לוח נתונים חי</div>
+    <div class="ticker" id="ticker"><span class="dot"></span><span>טוען משחק חי…</span></div>
+  </header>
+
+  <nav id="mainNav">
+    <button data-view="groups" class="active">טבלאות בתים</button>
+    <button data-view="results">תוצאות אחרונות</button>
+    <button data-view="upcoming">משחקים קרובים</button>
+    <button data-view="team">קבוצה</button>
+    <button data-view="scorers">שחקנים</button>
+  </nav>
+
+  <div id="groupSelectWrap" class="group-select"></div>
+  <div id="stageSelectWrap" class="stage-select"></div>
+
+  <div id="content"></div>
+
+  <footer>
+    עודכן לאחרונה: <span id="lastUpdated">—</span><br>
+    תמונת מצב שנוצרה על ידי fetch_worldcup.py. הרץ את הסקריפט שוב (או חכה לעדכון האוטומטי) בכל פעם שתרצה נתונים טריים.
+  </footer>
+</div>
+
+<div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()" title="סגור" aria-label="סגור">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const UPDATED_AT = /*__UPDATED__*/""/*__UPDATED__*/;
+// ---------- נתוני הטורניר (תמונת מצב אמיתית, 3.7.2026) ----------
+const teamsHe = {
+  "Mexico":"מקסיקו","South Africa":"דרום אפריקה","Korea Republic":"קוריאה הדרומית","Czechia":"צ'כיה",
+  "Switzerland":"שווייץ","Canada":"קנדה","Bosnia and Herzegovina":"בוסניה והרצגובינה","Qatar":"קטאר",
+  "Brazil":"ברזיל","Morocco":"מרוקו","Scotland":"סקוטלנד","Haiti":"האיטי",
+  "USA":"ארה\"ב","Australia":"אוסטרליה","Paraguay":"פרגוואי","Turkiye":"טורקיה",
+  "Germany":"גרמניה","Ivory Coast":"חוף השנהב","Ecuador":"אקוודור","Curacao":"קוראסאו",
+  "Netherlands":"הולנד","Japan":"יפן","Sweden":"שוודיה","Tunisia":"תוניסיה",
+  "Belgium":"בלגיה","Egypt":"מצרים","IR Iran":"איראן","New Zealand":"ניו זילנד",
+  "Spain":"ספרד","Cape Verde":"כף ורדה","Uruguay":"אורוגוואי","Saudi Arabia":"ערב הסעודית",
+  "France":"צרפת","Norway":"נורווגיה","Senegal":"סנגל","Iraq":"עיראק",
+  "Argentina":"ארגנטינה","Austria":"אוסטריה","Algeria":"אלג'יריה","Jordan":"ירדן",
+  "Colombia":"קולומביה","Portugal":"פורטוגל","Congo DR":"קונגו (הרפ' הדמוקרטית)","Uzbekistan":"אוזבקיסטן",
+  "England":"אנגליה","Croatia":"קרואטיה","Ghana":"גאנה","Panama":"פנמה","W83":"מנצחת/ת שמינית גמר 83"
+};
+// football-data.org לפעמים משתמש בשם אחר מזה שיש לנו כמפתח (למשל "United
+// States" במקום "USA"). הטבלה הזו ממפה כל כינוי ידוע לשם הקאנוני שמשמש
+// כמפתח ב-teamsHe וב-teamFlags, כך שהתרגום והדגל יעבדו לא משנה איזו גרסה
+// של השם מגיעה מה-API.
+const teamAliases = {
+  "United States": "USA", "United States of America": "USA",
+  "South Korea": "Korea Republic", "Korea, South": "Korea Republic", "Korea, Republic of": "Korea Republic",
+  "Iran": "IR Iran", "Islamic Republic of Iran": "IR Iran",
+  "Bosnia & Herzegovina": "Bosnia and Herzegovina", "Bosnia-Herzegovina": "Bosnia and Herzegovina", "Bosnia": "Bosnia and Herzegovina",
+  "Côte d'Ivoire": "Ivory Coast", "Cote d'Ivoire": "Ivory Coast", "Cote D'Ivoire": "Ivory Coast",
+  "Czech Republic": "Czechia",
+  "Turkey": "Turkiye", "Türkiye": "Turkiye",
+  "DR Congo": "Congo DR", "Democratic Republic of the Congo": "Congo DR", "Congo, DR": "Congo DR", "Congo DR (Congo-Kinshasa)": "Congo DR",
+  "Curaçao": "Curacao",
+  "Cabo Verde": "Cape Verde", "Cape Verde Islands": "Cape Verde",
+  "Republic of Ireland": "Ireland",
+};
+
+function canonicalTeam(name){
+  return teamAliases[name] || name;
+}
+
+function he(name){
+  if(!name) return 'טרם ידועה';
+  const key = canonicalTeam(name);
+  return teamsHe[key] || name;
+}
+
+const SEASON = /*__SEASON__*/2026/*__SEASON__*/;
+
+const teamFlags = {
+  "Mexico":"mx","South Africa":"za","Korea Republic":"kr","Czechia":"cz",
+  "Switzerland":"ch","Canada":"ca","Bosnia and Herzegovina":"ba","Qatar":"qa",
+  "Brazil":"br","Morocco":"ma","Scotland":"gb-sct","Haiti":"ht",
+  "USA":"us","Australia":"au","Paraguay":"py","Turkiye":"tr",
+  "Germany":"de","Ivory Coast":"ci","Ecuador":"ec","Curacao":"cw",
+  "Netherlands":"nl","Japan":"jp","Sweden":"se","Tunisia":"tn",
+  "Belgium":"be","Egypt":"eg","IR Iran":"ir","New Zealand":"nz",
+  "Spain":"es","Cape Verde":"cv","Uruguay":"uy","Saudi Arabia":"sa",
+  "France":"fr","Norway":"no","Senegal":"sn","Iraq":"iq",
+  "Argentina":"ar","Austria":"at","Algeria":"dz","Jordan":"jo",
+  "Colombia":"co","Portugal":"pt","Congo DR":"cd","Uzbekistan":"uz",
+  "England":"gb-eng","Croatia":"hr","Ghana":"gh","Panama":"pa"
+};
+
+function flagImg(name, size){
+  size = size || 18;
+  const code = teamFlags[canonicalTeam(name)];
+  if(!code) return '';
+  // flagcdn.com רק תומך בקבוצות רוחב קבועות: w20/w40/w80/w160/w320/w640/w1280/w2560.
+  // בקשת גודל אחר (כמו w18) מחזירה 404 - זו הייתה הסיבה שהדגלים לא הופיעו בכלל.
+  const buckets = [20,40,80,160,320,640,1280,2560];
+  const srcWidth = buckets.find(b=>b>=size) || 2560;
+  return `<img src="https://flagcdn.com/w${srcWidth}/${code}.png" alt="" loading="lazy"
+    style="width:${size}px;height:auto;vertical-align:middle;margin-left:7px;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.12);"
+    onerror="this.style.display='none';">`;
+}
+
+const standings = /*__STANDINGS__*/[]/*__STANDINGS__*/;
+
+const games = /*__GAMES__*/[]/*__GAMES__*/;
+const scorers = /*__SCORERS__*/[]/*__SCORERS__*/;
+const allPlayers = /*__ALLPLAYERS__*/[]/*__ALLPLAYERS__*/;
+
+// ---------- רינדור ----------
+const groups = [...new Set(standings.map(s=>s.group))].sort();
+let currentGroup = "ALL";
+let resultsAscending = false;   // ברירת מחדל: תוצאות - מהחדש לישן (יורד)
+let upcomingAscending = true;   // ברירת מחדל: משחקים קרובים - מהקרוב לרחוק (עולה)
+let currentTeam = null;
+let currentStage = "ALL";
+
+function fmtSigned(n){
+  // מציג מספר עם סימן בסוף (2+ / 2-) כדי שיתאים לכיווניות עברית, לא -2/+2
+  if(n>0) return n+'+';
+  if(n<0) return Math.abs(n)+'-';
+  return '0';
+}
+
+function gameTime(g, idx){
+  // מנסה לפרש תאריך אמיתי (ISO מה-API); אם אין - שומר על סדר המקור כגיבוי
+  const t = Date.parse(g.local);
+  return isNaN(t) ? idx : t;
+}
+
+function toggleResultsOrder(checked){ resultsAscending = checked; renderResults(); }
+function toggleUpcomingOrder(farToNearChecked){ upcomingAscending = !farToNearChecked; renderUpcoming(); }
+
+function renderGroupSelect(){
+  const wrap = document.getElementById('groupSelectWrap');
+  wrap.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.textContent = 'הכל';
+  allBtn.className = currentGroup==='ALL' ? 'active':'';
+  allBtn.onclick = ()=>{ currentGroup='ALL'; render(); };
+  wrap.appendChild(allBtn);
+  groups.forEach(g=>{
+    const b=document.createElement('button');
+    b.textContent = g;
+    b.className = currentGroup===g?'active':'';
+    b.onclick = ()=>{ currentGroup=g; render(); };
+    wrap.appendChild(b);
+  });
+}
+
+function stageOptions(){
+  const seen = new Map();
+  games.forEach(g=>{ if(g.stage) seen.set(g.stage, g.stageLabel || g.stage); });
+  return [...seen.entries()];
+}
+
+function renderStageSelect(){
+  const wrap = document.getElementById('stageSelectWrap');
+  const opts = stageOptions();
+  wrap.innerHTML = '';
+  if(!opts.length){ wrap.style.display='none'; return; }
+  const allBtn = document.createElement('button');
+  allBtn.textContent = 'כל השלבים';
+  allBtn.className = currentStage==='ALL' ? 'active' : '';
+  allBtn.onclick = ()=>{ currentStage='ALL'; render(); };
+  wrap.appendChild(allBtn);
+  opts.forEach(([key,label])=>{
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.className = currentStage===key ? 'active' : '';
+    b.onclick = ()=>{ currentStage=key; render(); };
+    wrap.appendChild(b);
+  });
+}
+
+function groupTable(g){
+  const rows = standings.filter(s=>s.group===g);
+  return `<div class="panel">
+    <h2>בית ${g}</h2>
+    <div class="desc">טבלת דירוג לאחר שלב הבתים</div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>נבחרת</th><th class="num">נצ'</th><th class="num">תיקו</th><th class="num">הפ'</th><th class="num">נק'</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr class="clickable-row" ${teamCellAttrs(r.team)}>
+          <td class="num ${r.rank===1?'rank1':''}">${r.rank}</td>
+          <td class="team ${r.rank===1?'rank1':''}">${flagImg(r.team)}${he(r.team)}</td>
+          <td class="num">${r.w}</td>
+          <td class="num">${r.d}</td>
+          <td class="num">${r.l}</td>
+          <td class="num"><b>${r.pts}</b></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderGroups(){
+  document.getElementById('groupSelectWrap').style.display='flex';
+  document.getElementById('stageSelectWrap').style.display='none';
+  const list = currentGroup==='ALL' ? groups : [currentGroup];
+  document.getElementById('content').innerHTML = list.map(groupTable).join('');
+}
+
+function renderResults(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='flex';
+  const finals = games
+    .map((g,i)=>({...g, _i:i}))
+    .filter(g=>g.status==='final' || g.status==='in_progress')
+    .filter(g=>currentStage==='ALL' || g.stage===currentStage)
+    .sort((a,b)=>{
+      const ta = gameTime(a,a._i), tb = gameTime(b,b._i);
+      return resultsAscending ? ta-tb : tb-ta;
+    });
+  document.getElementById('content').innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>תוצאות אחרונות</h2>
+        <div class="desc">כולל המשחק החי כרגע${currentStage!=='ALL' ? ' · שלב: ' + (stageOptions().find(([k])=>k===currentStage)||[])[1] : ''}</div>
+      </div>
+      <label class="sort-toggle">
+        <input type="checkbox" id="resultsSortToggle" autocomplete="off" onchange="toggleResultsOrder(this.checked)" ${resultsAscending?'checked':''}>
+        מיון מהישן לחדש
+      </label>
+    </div>
+    <table>
+      <thead><tr><th>תאריך ושעה</th><th>בית</th><th class="num">תוצאה</th><th>חוץ</th><th class="num">שלב</th><th class="num">סטטוס</th></tr></thead>
+      <tbody>
+        ${finals.length ? finals.map(g=>`<tr class="clickable-row ${g.status==='in_progress'?'live-row':''}" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
+          <td>${fmtDate(g.local)}</td>
+          <td class="team" ${teamCellAttrs(g.home)}>${flagImg(g.home)}${he(g.home)}</td>
+          <td class="num"><span class="score">${g.hs} – ${g.as}</span></td>
+          <td class="team" ${teamCellAttrs(g.away)}>${flagImg(g.away)}${he(g.away)}</td>
+          <td class="num" style="font-size:11.5px; color:var(--dim);">${g.stageLabel||''}</td>
+          <td class="num">${g.status==='in_progress' ? '<span class="status-live">חי ●</span>' : '<span class="status-final">הסתיים</span>'}</td>
+        </tr>`).join('') : `<tr><td colspan="6" style="text-align:center; color:var(--dim); padding:20px;">אין תוצאות בשלב הזה</td></tr>`}
+      </tbody>
+    </table>
+    ${unknownTeamsFootnote(finals)}
+  </div>`;
+  document.getElementById('resultsSortToggle').checked = resultsAscending;
+}
+
+function fmtDate(s){
+  // מקבל תאריך ISO (מה-API) או מחרוזת עברית מוכנה, ומחזיר תצוגה נוחה
+  if(!s) return '—';
+  const d = new Date(s);
+  if(isNaN(d)) return s; // כבר מחרוזת מעוצבת
+  return d.toLocaleString('he-IL', {weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+}
+
+function renderUpcoming(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='flex';
+  const upc = games
+    .map((g,i)=>({...g, _i:i}))
+    .filter(g=>g.status==='scheduled')
+    .filter(g=>currentStage==='ALL' || g.stage===currentStage)
+    .sort((a,b)=>{
+      const ta = gameTime(a,a._i), tb = gameTime(b,b._i);
+      return upcomingAscending ? ta-tb : tb-ta;
+    });
+  const hasProbs = upc.some(g=>g.p);
+  document.getElementById('content').innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>משחקים קרובים</h2>
+        <div class="desc">${hasProbs ? 'עם הערכת סיכויי ניצחון' : 'סיכויי ניצחון אינם זמינים במקור הנתונים הנוכחי'}</div>
+      </div>
+      <label class="sort-toggle">
+        <input type="checkbox" id="upcomingSortToggle" autocomplete="off" onchange="toggleUpcomingOrder(this.checked)" ${!upcomingAscending?'checked':''}>
+        מיון מהרחוק לקרוב
+      </label>
+    </div>
+    <table>
+      <thead><tr><th>תאריך ושעה</th><th>בית</th><th>חוץ</th><th class="num">שלב</th><th>סיכויים (בית / תיקו / חוץ)</th></tr></thead>
+      <tbody>
+        ${upc.length ? upc.map(g=>`<tr class="clickable-row" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
+          <td>${fmtDate(g.local)}</td>
+          <td class="team" ${teamCellAttrs(g.home)}>${flagImg(g.home)}${he(g.home)}</td>
+          <td class="team" ${teamCellAttrs(g.away)}>${flagImg(g.away)}${he(g.away)}</td>
+          <td class="num" style="font-size:11.5px; color:var(--dim);">${g.stageLabel||''}</td>
+          <td>
+            ${g.p ? `<div style="display:flex;align-items:center;gap:8px;">
+              <div class="prob-bar">
+                <span style="width:${g.p.h}%; background:var(--win);"></span>
+                <span style="width:${g.p.d}%; background:var(--dim2);"></span>
+                <span style="width:${g.p.a}%; background:var(--gold);"></span>
+              </div>
+              <span style="font-family:'Roboto Mono',monospace; font-size:11px; color:var(--dim);">${g.p.h}% / ${g.p.d}% / ${g.p.a}%</span>
+            </div>` : `<span style="color:var(--dim2); font-size:12.5px;">טרם ידוע</span>`}
+          </td>
+        </tr>`).join('') : `<tr><td colspan="5" style="text-align:center; color:var(--dim); padding:20px;">אין משחקים קרובים בשלב הזה</td></tr>`}
+      </tbody>
+    </table>
+    ${unknownTeamsFootnote(upc)}
+  </div>`;
+  document.getElementById('upcomingSortToggle').checked = !upcomingAscending;
+}
+
+function teamMatches(teamEn){
+  return games.filter(g=>g.home===teamEn || g.away===teamEn);
+}
+
+function teamAggStats(teamEn){
+  // הכל מחושב מאותה רשימת משחקים בדיוק - כדי שהמספרים תמיד יסתדרו זה עם זה.
+  // רק משחקים שהסתיימו (status==='final') נספרים; משחק חי עדיין לא סופי,
+  // ולכן לא נכלל עד שיסתיים (אחרת אי אפשר לדעת אם הוא ניצחון/תיקו/הפסד).
+  const finished = teamMatches(teamEn).filter(g=>g.status==='final');
+  let gf=0, ga=0, w=0, d=0, l=0;
+  finished.forEach(g=>{
+    const isHome = g.home===teamEn;
+    const forG = isHome ? g.hs : g.as;
+    const againstG = isHome ? g.as : g.hs;
+    gf += forG; ga += againstG;
+    if(forG > againstG) w++;
+    else if(forG === againstG) d++;
+    else l++;
+  });
+  return { played: finished.length, gf, ga, gd: gf-ga, w, d, l, pts: w*3+d };
+}
+
+function teamProfileHTML(teamEn){
+  const st = standings.find(s=>s.team===teamEn);
+  const agg = teamAggStats(teamEn);
+  const matches = teamMatches(teamEn)
+    .map((g,i)=>({...g, _i:i}))
+    .sort((a,b)=>gameTime(a,a._i)-gameTime(b,b._i));
+
+  return `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>${flagImg(teamEn, 26)}${he(teamEn)}</h2>
+        <div class="desc">${st ? `בית ${st.group} · מקום ${st.rank} מתוך 4` : 'אין נתוני טבלה עבור נבחרת זו'}</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num">${agg.played}</div><div class="stat-label">משחקים ששוחקו</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.w}</div><div class="stat-label">נצחונות</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.d}</div><div class="stat-label">תיקו</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.l}</div><div class="stat-label">הפסדים</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.gf}</div><div class="stat-label">שערי זכות</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.ga}</div><div class="stat-label">שערי חובה</div></div>
+      <div class="stat-box"><div class="stat-num">${fmtSigned(agg.gd)}</div><div class="stat-label">הפרש שערים</div></div>
+      <div class="stat-box gold"><div class="stat-num">${agg.pts}</div><div class="stat-label">נקודות</div></div>
+    </div>
+    <div class="desc" style="margin:-10px 0 16px;">הטבלה למטה כוללת גם משחקים עתידיים - לכן ייתכן שיהיו בה יותר שורות ממספר "משחקים ששוחקו" למעלה. הנקודות כאן מחושבות מתוצאות המשחקים ועשויות להיבדל מעט מדירוג הבית הרשמי, שמתעדכן לפעמים באיחור אצל football-data.org.</div>
+    <table>
+      <thead><tr><th>תאריך ושעה</th><th>יריבה</th><th class="num">מקום</th><th class="num">תוצאה</th><th class="num">סטטוס</th></tr></thead>
+      <tbody>
+        ${matches.map(g=>{
+          const isHome = g.home===teamEn;
+          const opp = isHome ? g.away : g.home;
+          const played = g.status==='final' || g.status==='in_progress';
+          const scoreTxt = played ? (isHome ? `${g.hs} – ${g.as}` : `${g.as} – ${g.hs}`) : '—';
+          const statusTxt = g.status==='in_progress' ? '<span class="status-live">חי ●</span>'
+                            : g.status==='final' ? '<span class="status-final">הסתיים</span>'
+                            : '<span class="status-sched">מתוכנן</span>';
+          return `<tr class="clickable-row ${g.status==='in_progress'?'live-row':''}" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
+            <td>${fmtDate(g.local)}</td>
+            <td class="team" ${teamCellAttrs(opp)}>${flagImg(opp)}${he(opp)}</td>
+            <td class="num">${isHome ? 'בית' : 'חוץ'}</td>
+            <td class="num"><span class="score">${scoreTxt}</span></td>
+            <td class="num">${statusTxt}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${unknownTeamsFootnote(matches)}
+  </div>`;
+}
+
+function selectTeam(teamEn){ currentTeam = teamEn || null; renderTeamView(); }
+
+function renderTeamView(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='none';
+
+  const teamList = [...new Set(standings.map(s=>s.team))]
+    .map(t=>({en:t, label:he(t)}))
+    .sort((a,b)=>a.label.localeCompare(b.label, 'he'));
+
+  let html = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>בחירת קבוצה</h2>
+        <div class="desc">בחר נבחרת כדי לראות את כל המשחקים שלה והסטטיסטיקה</div>
+      </div>
+    </div>
+    <select id="teamSelect" class="team-select" onchange="selectTeam(this.value)">
+      <option value="">— בחר קבוצה —</option>
+      ${teamList.map(t=>`<option value="${t.en}" ${currentTeam===t.en?'selected':''}>${t.label}</option>`).join('')}
+    </select>
+  </div>`;
+
+  if(currentTeam){
+    html += teamProfileHTML(currentTeam);
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+let scorerSearch = "";
+let scorerSearchRaw = "";  // הטקסט הגולמי (בלי trim) - כדי שהתיבה לא תקפוץ תוך כדי הקלדה
+let scorerCountry = "";
+let scorersMode = "top";       // "top" = מלכי שערים, "all" = כל השחקנים
+let allPlayersTeam = "";
+
+function filterScorers(q){
+  scorerSearchRaw = q;
+  scorerSearch = q.trim().toLowerCase();
+  renderScorers();
+  const el = document.getElementById('playerSearchBox');
+  if(el){ el.focus(); const pos = q.length; el.setSelectionRange(pos, pos); }
+}
+function filterScorerCountry(v){ scorerCountry = v; renderScorers(); }
+function filterAllPlayersTeam(v){ allPlayersTeam = v; renderScorers(); }
+function toggleScorersMode(checked){ scorersMode = checked ? 'all' : 'top'; scorerSearch=''; scorerSearchRaw=''; renderScorers(); }
+
+function avatarCell(url){
+  // עמודת תמונה נפרדת. onerror מטפל במקרה שהתמונה חסומה/לא זמינה, ומחליף ב-"—"
+  if(!url) return `<span style="color:var(--dim2);">—</span>`;
+  return `<img src="${url}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;background:var(--bg2);display:block;margin:0 auto;" onerror="this.outerHTML='<span style=&quot;color:var(--dim2)&quot;>—</span>'">`;
+}
+
+function renderTopScorersTable(){
+  const countries = [...new Set(scorers.map(p=>p.nationality).filter(Boolean))].sort((a,b)=>he(a).localeCompare(he(b),'he'));
+
+  const filtered = scorers.filter(p=>{
+    if(scorerCountry && p.nationality !== scorerCountry) return false;
+    if(!scorerSearch) return true;
+    return (p.name||'').toLowerCase().includes(scorerSearch) ||
+           (p.team||'').toLowerCase().includes(scorerSearch) ||
+           he(p.team).includes(scorerSearch);
+  });
+
+  return `
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+      <input type="text" id="playerSearchBox" class="team-select" placeholder="חיפוש שחקן או נבחרת..." value="${scorerSearchRaw}"
+             oninput="filterScorers(this.value)" style="flex:1; min-width:200px; margin-bottom:0;">
+      <select class="team-select" onchange="filterScorerCountry(this.value)" style="max-width:220px; margin-bottom:0;">
+        <option value="">כל המדינות</option>
+        ${countries.map(c=>`<option value="${c}" ${scorerCountry===c?'selected':''}>${he(c)}</option>`).join('')}
+      </select>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="num">תמונה</th><th>#</th><th>שחקן</th><th>נבחרת</th><th>עמדה</th><th class="num">גיל</th>
+        <th class="num">שערים</th><th class="num">בישולים</th><th class="num">הופעות</th><th class="num">כרטיסים</th>
+      </tr></thead>
+      <tbody>
+        ${filtered.length ? filtered.map(p=>`<tr class="clickable-row" data-player-idx="${scorers.indexOf(p)}" ondblclick="handlePlayerDblClick('scorers', this)" title="לחיצה כפולה לפרטי השחקן">
+          <td class="num">${avatarCell(p.photo)}</td>
+          <td class="num">${p.rank}</td>
+          <td class="team">${p.name || '—'}</td>
+          <td class="team" ${teamCellAttrs(p.team)}>${flagImg(p.team)}${he(p.team) || '—'}</td>
+          <td style="font-size:12.5px; color:var(--dim);">${p.position || '—'}</td>
+          <td class="num">${p.age ?? '—'}</td>
+          <td class="num"><b>${p.goals}</b></td>
+          <td class="num">${p.assists}</td>
+          <td class="num">${p.appearances}</td>
+          <td class="num">${p.yellow ? `<span style="color:#e0c23b;">■</span>${p.yellow>1?' ×'+p.yellow:''}` : ''}${p.red ? ` <span style="color:var(--live);">■</span>${p.red>1?' ×'+p.red:''}` : ''}${(!p.yellow && !p.red) ? '—' : ''}</td>
+        </tr>`).join('') : `<tr><td colspan="10" style="text-align:center; color:var(--dim); padding:20px;">לא נמצאו תוצאות</td></tr>`}
+      </tbody>
+    </table>`;
+}
+
+function renderAllPlayersTable(){
+  if(!allPlayers.length){
+    return `<div class="desc">אין עדיין רשימת שחקנים מלאה. הרץ את fetch_worldcup.py עם FETCH_ALL_PLAYERS = True ומפתח api-sports.io תקין.</div>`;
+  }
+
+  const teamList = [...new Set(allPlayers.map(p=>p.team))]
+    .map(t=>({en:t, label:he(t)}))
+    .sort((a,b)=>a.label.localeCompare(b.label,'he'));
+
+  const filtered = allPlayers.filter(p=>{
+    if(allPlayersTeam && p.team !== allPlayersTeam) return false;
+    if(!scorerSearch) return true;
+    return (p.name||'').toLowerCase().includes(scorerSearch) || he(p.team).includes(scorerSearch);
+  });
+
+  return `
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+      <input type="text" id="playerSearchBox" class="team-select" placeholder="חיפוש שחקן..." value="${scorerSearchRaw}"
+             oninput="filterScorers(this.value)" style="flex:1; min-width:200px; margin-bottom:0;">
+      <select class="team-select" onchange="filterAllPlayersTeam(this.value)" style="max-width:220px; margin-bottom:0;">
+        <option value="">כל הנבחרות</option>
+        ${teamList.map(t=>`<option value="${t.en}" ${allPlayersTeam===t.en?'selected':''}>${t.label}</option>`).join('')}
+      </select>
+    </div>
+    <div class="desc" style="margin-top:-6px;">רשימת סגל בלבד - אין נתוני שערים/הופעות עבור כל השחקנים (רק עבור מלכי השערים), כדי לחסוך במכסת ה-API.</div>
+    <table>
+      <thead><tr><th class="num">תמונה</th><th>#</th><th>שחקן</th><th>נבחרת</th><th>עמדה</th><th class="num">גיל</th><th class="num">מספר</th></tr></thead>
+      <tbody>
+        ${filtered.length ? filtered.map((p,i)=>`<tr class="clickable-row" data-player-idx="${allPlayers.indexOf(p)}" ondblclick="handlePlayerDblClick('all', this)" title="לחיצה כפולה לפרטי השחקן">
+          <td class="num">${avatarCell(p.photo)}</td>
+          <td class="num">${i+1}</td>
+          <td class="team">${p.name || '—'}</td>
+          <td class="team" ${teamCellAttrs(p.team)}>${flagImg(p.team)}${he(p.team) || '—'}</td>
+          <td style="font-size:12.5px; color:var(--dim);">${p.position || '—'}</td>
+          <td class="num">${p.age ?? '—'}</td>
+          <td class="num">${p.number ?? '—'}</td>
+        </tr>`).join('') : `<tr><td colspan="7" style="text-align:center; color:var(--dim); padding:20px;">לא נמצאו תוצאות</td></tr>`}
+      </tbody>
+    </table>`;
+}
+
+function renderScorers(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='none';
+
+  if(!scorers.length && !allPlayers.length){
+    document.getElementById('content').innerHTML = `<div class="panel">
+      <h2>שחקנים</h2>
+      <div class="desc">אין עדיין נתוני שחקנים. הרץ את fetch_worldcup.py עם מפתח api-sports.io תקין.</div>
+    </div>`;
+    return;
+  }
+
+  document.getElementById('content').innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>${scorersMode==='top' ? 'מלכי השערים' : 'כל השחקנים'}</h2>
+        <div class="desc">מקור: api-sports.io${scorersMode==='top' ? ' · עד 20 השחקנים המובילים בטורניר' : ' · כל הסגלים הרשומים'}</div>
+      </div>
+      <label class="sort-toggle">
+        <input type="checkbox" id="scorersModeToggle" autocomplete="off" onchange="toggleScorersMode(this.checked)" ${scorersMode==='all'?'checked':''}>
+        הצג את כל השחקנים
+      </label>
+    </div>
+    ${scorersMode==='top' ? renderTopScorersTable() : renderAllPlayersTable()}
+  </div>`;
+  document.getElementById('scorersModeToggle').checked = (scorersMode==='all');
+}
+
+function render(){
+  renderGroupSelect();
+  renderStageSelect();
+  const view = document.querySelector('#mainNav button.active').dataset.view;
+  if(view==='groups') renderGroups();
+  else if(view==='results') renderResults();
+  else if(view==='upcoming') renderUpcoming();
+  else if(view==='team') renderTeamView();
+  else renderScorers();
+}
+
+document.querySelectorAll('#mainNav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#mainNav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+
+// עדכון כותרות לפי SEASON - כדי שהעמוד יעבוד נכון גם אם משנים עונה בסקריפט
+document.title = `מונדיאל ${SEASON} — לוח נתונים`;
+document.getElementById('seasonFull').textContent = SEASON;
+document.getElementById('seasonShort').textContent = String(SEASON).slice(-2);
+document.getElementById('lastUpdated').textContent = UPDATED_AT || '—';
+
+function unknownTeamsFootnote(list){
+  const hasUnknown = list.some(g=>!g.home || !g.away);
+  if(!hasUnknown) return '';
+  return `<div class="desc" style="margin-top:14px; margin-bottom:0;">* טרם ידועה - בשלב זה הקבוצות המשתתפות אינן ידועות.</div>`;
+}
+
+// ---------- לחיצה כפולה (MDC): דשבורדים למשחק / שחקן / קבוצה ----------
+function openModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.addEventListener('keydown', modalEscHandler);
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.removeEventListener('keydown', modalEscHandler);
+}
+function modalEscHandler(e){ if(e.key==='Escape') closeModal(); }
+
+function handleTeamDblClick(ev, cellEl){
+  ev.stopPropagation(); // כדי שלא תיפתח גם דשבורד המשחק של השורה שמסביב
+  const team = cellEl.dataset.team;
+  if(team) openModal(teamProfileHTML(team));
+}
+
+function teamCellAttrs(name){
+  // רק אם יש שם קבוצה אמיתי - אחרת "null" היה נכנס כמחרוזת ממש לתוך
+  // ה-attribute וגורם בדיוק לאותה תקלת "null" שכבר תיקנו בעבר.
+  return name ? `data-team="${name}" ondblclick="handleTeamDblClick(event, this)" title="לחיצה כפולה לפרטי הנבחרת"` : '';
+}
+
+function handleGameDblClick(rowEl){
+  const idx = parseInt(rowEl.dataset.gameIdx, 10);
+  const g = games[idx];
+  if(g) openModal(gameProfileHTML(g));
+}
+
+function handlePlayerDblClick(source, rowEl){
+  const idx = parseInt(rowEl.dataset.playerIdx, 10);
+  const p = source==='scorers' ? scorers[idx] : allPlayers[idx];
+  if(p) openModal(playerProfileHTML(p, source));
+}
+
+function gameProfileHTML(g){
+  const played = g.status==='final' || g.status==='in_progress';
+  const statusTxt = g.status==='in_progress' ? '<span class="status-live">חי ●</span>'
+                    : g.status==='final' ? '<span class="status-final">הסתיים</span>'
+                    : '<span class="status-sched">מתוכנן</span>';
+  const homeSt = g.home ? standings.find(s=>s.team===g.home) : null;
+  const awaySt = g.away ? standings.find(s=>s.team===g.away) : null;
+
+  return `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>פרטי משחק</h2>
+        <div class="desc">${g.stageLabel || ''}${g.stageLabel ? ' · ' : ''}${fmtDate(g.local)}</div>
+      </div>
+    </div>
+    <div class="match-hero">
+      <div class="side">
+        ${g.home ? flagImg(g.home, 44) : ''}
+        <div class="name">${he(g.home)}</div>
+        ${homeSt ? `<div class="desc" style="margin:0;">בית ${homeSt.group} · מקום ${homeSt.rank}</div>` : ''}
+      </div>
+      <div class="mid">
+        ${played
+          ? `<div class="score" style="font-size:30px;">${g.hs} – ${g.as}</div>`
+          : `<div class="vs">VS</div>`}
+        <div style="margin-top:6px;">${statusTxt}</div>
+      </div>
+      <div class="side">
+        ${g.away ? flagImg(g.away, 44) : ''}
+        <div class="name">${he(g.away)}</div>
+        ${awaySt ? `<div class="desc" style="margin:0;">בית ${awaySt.group} · מקום ${awaySt.rank}</div>` : ''}
+      </div>
+    </div>
+    ${g.p ? `<div class="desc" style="text-align:center; margin-bottom:10px;">סיכויי ניצחון (בית / תיקו / חוץ): ${g.p.h}% / ${g.p.d}% / ${g.p.a}%</div>` : ''}
+    ${unknownTeamsFootnote([g])}
+  </div>`;
+}
+
+function playerProfileHTML(p, source){
+  const isScorer = source==='scorers';
+  return `<div class="panel">
+    <div class="player-hero">
+      ${p.photo ? `<img src="${p.photo}" alt="" onerror="this.style.display='none';">` : ''}
+      <div>
+        <h2>${p.name || 'שחקן'}</h2>
+        <div class="desc" style="margin:0;">
+          ${flagImg(p.team)}${he(p.team) || ''}${p.position ? ' · ' + p.position : ''}${p.age ? ' · גיל ' + p.age : ''}
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid" style="grid-template-columns: repeat(${isScorer?4:3}, 1fr);">
+      ${isScorer ? `
+        <div class="stat-box gold"><div class="stat-num">${p.goals}</div><div class="stat-label">שערים</div></div>
+        <div class="stat-box"><div class="stat-num">${p.assists}</div><div class="stat-label">בישולים</div></div>
+        <div class="stat-box"><div class="stat-num">${p.appearances}</div><div class="stat-label">הופעות</div></div>
+        <div class="stat-box"><div class="stat-num">${p.minutes ?? '—'}</div><div class="stat-label">דקות</div></div>
+      ` : `
+        <div class="stat-box"><div class="stat-num">${p.number ?? '—'}</div><div class="stat-label">מספר</div></div>
+        <div class="stat-box"><div class="stat-num">${p.position || '—'}</div><div class="stat-label">עמדה</div></div>
+        <div class="stat-box"><div class="stat-num">${p.age ?? '—'}</div><div class="stat-label">גיל</div></div>
+      `}
+    </div>
+    ${isScorer && (p.yellow || p.red) ? `<div class="desc" style="text-align:center;">
+      ${p.yellow ? `<span style="color:#e0c23b;">■</span> ${p.yellow} צהובים ` : ''}
+      ${p.red ? `<span style="color:var(--live);">■</span> ${p.red} אדומים` : ''}
+    </div>` : ''}
+    ${!isScorer ? `<div class="desc" style="text-align:center;">נתוני שערים/הופעות זמינים רק עבור מלכי השערים, לא עבור כל השחקנים.</div>` : ''}
+  </div>`;
+}
+
+// ticker: show the live game if any
+const live = games.find(g=>g.status==='in_progress');
+const tickerEl = document.getElementById('ticker');
+if(live){
+  tickerEl.innerHTML = `<span class="dot"></span><span>חי עכשיו: <b>${he(live.home)} ${live.hs} - ${live.as} ${he(live.away)}</b></span>`;
+} else {
+  tickerEl.innerHTML = `<span>אין כרגע משחק חי</span>`;
+}
+
+render();
+</script>
+</body>
+</html>
