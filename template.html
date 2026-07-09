@@ -30,6 +30,11 @@
     font-family:'Heebo', sans-serif;
     min-height:100vh;
   }
+  .stadium-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  }
+  .stadium-bg svg{ width:100%; height:100%; display:block; }
+
   .pitch-lines{
     position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.05;
     background-image:
@@ -123,6 +128,13 @@
   .sort-toggle input{ accent-color:var(--gold); cursor:pointer; width:15px; height:15px; }
   .sort-toggle:hover{ color:var(--cream); }
 
+  .external-link{
+    display:inline-flex; align-items:center; gap:6px; margin-top:16px;
+    font-size:12.5px; color:var(--dim); text-decoration:none; border-top:1px solid var(--panel-line);
+    padding-top:12px; width:100%;
+  }
+  .external-link:hover{ color:var(--gold-soft); }
+
   .bracket-toggles{
     display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--dim);
   }
@@ -151,8 +163,11 @@
   }
   .group-mini{ background:var(--bg2); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; }
   .group-mini-title{ font-family:'Roboto Mono',monospace; font-size:11px; color:var(--gold-soft); margin-bottom:4px; }
-  .group-mini-team{ font-size:11.5px; padding:1px 0; display:flex; align-items:center; cursor:pointer; }
-  .group-mini-team:hover{ text-decoration:underline; text-decoration-color:var(--gold-soft); }
+  .group-mini-team{ font-size:11.5px; padding:2px 0; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+  .group-mini-team:hover .group-mini-name{ text-decoration:underline; text-decoration-color:var(--gold-soft); }
+  .group-mini-team.qualified{ color:var(--gold-soft); font-weight:600; }
+  .group-mini-name{ display:flex; align-items:center; gap:4px; }
+  .group-mini-pts{ font-family:'Roboto Mono',monospace; font-size:11px; }
 
   .third-place-box{ margin-top:20px; max-width:300px; }
 
@@ -256,6 +271,44 @@
 </style>
 </head>
 <body>
+<div class="stadium-bg" aria-hidden="true">
+  <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="120" cy="80" r="1.4" fill="#f3efe4" opacity="0.35"/>
+    <circle cx="260" cy="140" r="1" fill="#f3efe4" opacity="0.22"/>
+    <circle cx="410" cy="60" r="1.6" fill="#f3efe4" opacity="0.3"/>
+    <circle cx="700" cy="110" r="1.2" fill="#f3efe4" opacity="0.26"/>
+    <circle cx="980" cy="70" r="1.4" fill="#f3efe4" opacity="0.3"/>
+    <circle cx="1220" cy="130" r="1" fill="#f3efe4" opacity="0.2"/>
+    <circle cx="1400" cy="90" r="1.6" fill="#f3efe4" opacity="0.28"/>
+    <circle cx="1520" cy="160" r="1.1" fill="#f3efe4" opacity="0.22"/>
+    <circle cx="60" cy="220" r="1" fill="#f3efe4" opacity="0.16"/>
+    <circle cx="850" cy="200" r="1" fill="#f3efe4" opacity="0.16"/>
+
+    <g opacity="0.10">
+      <polygon points="180,650 60,55 300,55" fill="#e8c766"/>
+      <polygon points="620,650 500,35 740,35" fill="#e8c766"/>
+      <polygon points="980,650 860,35 1100,35" fill="#e8c766"/>
+      <polygon points="1420,650 1300,55 1540,55" fill="#e8c766"/>
+    </g>
+
+    <path d="M0,760 Q800,610 1600,760 L1600,900 L0,900 Z" fill="#0a2119" opacity="0.55"/>
+    <path d="M0,800 Q800,665 1600,800 L1600,900 L0,900 Z" fill="#08190f" opacity="0.62"/>
+    <path d="M0,840 Q800,725 1600,840 L1600,900 L0,900 Z" fill="#061410" opacity="0.72"/>
+
+    <g fill="#0a2119">
+      <rect x="172" y="555" width="8" height="100"/>
+      <rect x="612" y="535" width="8" height="110"/>
+      <rect x="972" y="535" width="8" height="110"/>
+      <rect x="1412" y="555" width="8" height="100"/>
+    </g>
+    <g fill="#e8c766" opacity="0.55">
+      <rect x="158" y="543" width="34" height="14" rx="2"/>
+      <rect x="598" y="523" width="34" height="14" rx="2"/>
+      <rect x="958" y="523" width="34" height="14" rx="2"/>
+      <rect x="1398" y="543" width="34" height="14" rx="2"/>
+    </g>
+  </svg>
+</div>
 <div class="pitch-lines"></div>
 <div class="wrap">
 
@@ -392,12 +445,30 @@ const BRACKET_BOX_W = 172, BRACKET_BOX_H = 58, BRACKET_ROW_GAP = 14, BRACKET_COL
 let visibleStages = new Set(["LAST_32","LAST_16","QUARTER_FINALS","SEMI_FINALS","FINAL"]);
 let showGroupStage = false;
 let showThirdPlace = false;
+let teamMatchesAscending = true;  // ברירת מחדל: מהקרוב לרחוק
+let modalTeam = null;             // איזו קבוצה מוצגת כרגע במודל (יכולה להיות שונה מ-currentTeam בטאב הראשי)
+
+function toggleTeamMatchesOrder(farToNearChecked){
+  teamMatchesAscending = !farToNearChecked;
+  if(document.getElementById('modalOverlay').classList.contains('open') && modalTeam){
+    openModal(teamProfileHTML(modalTeam));
+  } else if(currentTeam){
+    renderTeamView();
+  }
+}
 
 function fmtSigned(n){
   // מציג מספר עם סימן בסוף (2+ / 2-) כדי שיתאים לכיווניות עברית, לא -2/+2
   if(n>0) return n+'+';
   if(n<0) return Math.abs(n)+'-';
   return '0';
+}
+
+function externalSearchLink(query){
+  // קישור חיצוני בלבד (לא שאיבת תוכן!) - נפתח בכרטיסייה חדשה, המשתמש
+  // גולש שם בעצמו. זה בדיוק ההבדל בין קישור לגיטימי לבין scraping.
+  const url = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+  return `<a class="external-link" href="${url}" target="_blank" rel="noopener noreferrer">🔎 חיפוש מידע נוסף על זה ↗</a>`;
 }
 
 function gameTime(g, idx){
@@ -605,7 +676,10 @@ function teamProfileHTML(teamEn){
   const agg = teamAggStats(teamEn);
   const matches = teamMatches(teamEn)
     .map((g,i)=>({...g, _i:i}))
-    .sort((a,b)=>gameTime(a,a._i)-gameTime(b,b._i));
+    .sort((a,b)=>{
+      const ta = gameTime(a,a._i), tb = gameTime(b,b._i);
+      return teamMatchesAscending ? ta-tb : tb-ta;
+    });
 
   return `<div class="panel">
     <div class="panel-header">
@@ -625,6 +699,13 @@ function teamProfileHTML(teamEn){
       <div class="stat-box gold"><div class="stat-num">${agg.pts}</div><div class="stat-label">נקודות</div></div>
     </div>
     <div class="desc" style="margin:-10px 0 16px;">הטבלה למטה כוללת גם משחקים עתידיים - לכן ייתכן שיהיו בה יותר שורות ממספר "משחקים ששוחקו" למעלה. הנקודות כאן מחושבות מתוצאות המשחקים ועשויות להיבדל מעט מדירוג הבית הרשמי, שמתעדכן לפעמים באיחור אצל football-data.org.</div>
+    <div class="panel-header" style="margin-bottom:10px;">
+      <div><h2 style="font-size:15px;">לוח משחקים</h2></div>
+      <label class="sort-toggle">
+        <input type="checkbox" autocomplete="off" onchange="toggleTeamMatchesOrder(this.checked)" ${!teamMatchesAscending?'checked':''}>
+        מיון מהרחוק לקרוב
+      </label>
+    </div>
     <table>
       <thead><tr><th>תאריך ושעה</th><th>יריבה</th><th class="num">מקום</th><th class="num">תוצאה</th><th class="num">סטטוס</th></tr></thead>
       <tbody>
@@ -647,6 +728,7 @@ function teamProfileHTML(teamEn){
       </tbody>
     </table>
     ${unknownTeamsFootnote(matches)}
+    ${externalSearchLink(he(teamEn) + ' מונדיאל 2026')}
   </div>`;
 }
 
@@ -882,12 +964,16 @@ function bracketBoxHTML(entry, x, y){
 function groupStripHTML(){
   const groups = [...new Set(standings.map(s=>s.group))].sort();
   if(!groups.length) return '<div class="desc">אין נתוני בתים.</div>';
-  return `<div class="group-strip">
+  return `<div class="desc" style="margin-bottom:12px;">מודגש בזהב = עולה ישירות לשלב ה-32 (2 הראשונות מכל בית, ועוד 8 השלישיות הטובות ביותר בין כל הבתים).</div>
+  <div class="group-strip">
     ${groups.map(g=>{
       const rows = standings.filter(s=>s.group===g).sort((a,b)=>a.rank-b.rank);
       return `<div class="group-mini">
         <div class="group-mini-title">בית ${g}</div>
-        ${rows.map(r=>`<div class="group-mini-team" ${teamCellAttrs(r.team)}>${flagImg(r.team,14)}${he(r.team)}</div>`).join('')}
+        ${rows.map(r=>`<div class="group-mini-team ${r.rank<=2?'qualified':''}" ${teamCellAttrs(r.team)}>
+          <span class="group-mini-name">${flagImg(r.team,14)}${he(r.team)}</span>
+          <span class="group-mini-pts">${r.pts}</span>
+        </div>`).join('')}
       </div>`;
     }).join('')}
   </div>`;
@@ -1025,7 +1111,7 @@ function modalEscHandler(e){ if(e.key==='Escape') closeModal(); }
 function handleTeamDblClick(ev, cellEl){
   ev.stopPropagation(); // כדי שלא תיפתח גם דשבורד המשחק של השורה שמסביב
   const team = cellEl.dataset.team;
-  if(team) openModal(teamProfileHTML(team));
+  if(team){ modalTeam = team; openModal(teamProfileHTML(team)); }
 }
 
 function teamCellAttrs(name){
@@ -1081,6 +1167,7 @@ function gameProfileHTML(g){
     </div>
     ${g.p ? `<div class="desc" style="text-align:center; margin-bottom:10px;">סיכויי ניצחון (בית / תיקו / חוץ): ${g.p.h}% / ${g.p.d}% / ${g.p.a}%</div>` : ''}
     ${unknownTeamsFootnote([g])}
+    ${externalSearchLink((g.home && g.away) ? `${he(g.home)} ${he(g.away)} מונדיאל 2026` : `${g.stageLabel||''} מונדיאל 2026`)}
   </div>`;
 }
 
@@ -1113,6 +1200,7 @@ function playerProfileHTML(p, source){
       ${p.red ? `<span style="color:var(--live);">■</span> ${p.red} אדומים` : ''}
     </div>` : ''}
     ${!isScorer ? `<div class="desc" style="text-align:center;">נתוני שערים/הופעות זמינים רק עבור מלכי השערים, לא עבור כל השחקנים.</div>` : ''}
+    ${p.name ? externalSearchLink(`${p.name} ${he(p.team)||''} כדורגל`) : ''}
   </div>`;
 }
 
