@@ -34,7 +34,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import requests
 
 
@@ -255,8 +255,16 @@ def build_html(standings, games, scorers, all_players):
     with open(TEMPLATE_FILE, "r", encoding="utf-8") as f:
         template = f.read()
 
-    now = datetime.now(timezone.utc)
-    updated_str = now.strftime("%d.%m.%Y %H:%M UTC")
+    # שעון ישראל, כולל מעבר קיץ/חורף אוטומטי. ב-Windows ייתכן שחסר מאגר
+    # אזורי הזמן (tzdata) - במקרה כזה נופלים בחזרה לקירוב קבוע של UTC+3.
+    try:
+        from zoneinfo import ZoneInfo
+        now = datetime.now(ZoneInfo("Asia/Jerusalem"))
+        tz_label = "שעון ישראל"
+    except Exception:
+        now = datetime.now(timezone.utc) + timedelta(hours=3)
+        tz_label = "קירוב לשעון ישראל, UTC+3"
+    updated_str = f"{now.strftime('%d.%m.%Y %H:%M')} ({tz_label})"
 
     replacements = {
         "/*__STANDINGS__*/[]/*__STANDINGS__*/": json.dumps(standings, ensure_ascii=False),
