@@ -123,6 +123,39 @@
   .sort-toggle input{ accent-color:var(--gold); cursor:pointer; width:15px; height:15px; }
   .sort-toggle:hover{ color:var(--cream); }
 
+  .bracket-toggles{
+    display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--dim);
+  }
+  .bracket-toggles label{ display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none; }
+  .bracket-toggles label:hover{ color:var(--cream); }
+  .bracket-toggles input{ accent-color:var(--gold); cursor:pointer; }
+
+  .bracket-scroll{ overflow-x:auto; padding-bottom:14px; }
+  .bracket-container{ position:relative; direction:ltr; }
+  .bracket-box{
+    position:absolute; background:var(--bg2); border:1px solid var(--panel-line); border-radius:8px;
+    display:flex; flex-direction:column; justify-content:center; padding:4px 10px; box-sizing:border-box;
+    direction:rtl;
+  }
+  .bracket-box.clickable-row{ cursor:pointer; }
+  .bracket-box.clickable-row:hover{ border-color:var(--gold-soft); }
+  .bracket-box-empty{ border-style:dashed; opacity:0.6; }
+  .bracket-box-live{ border-color:var(--live); }
+  .bracket-team{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; padding:3px 0; gap:6px; }
+  .bracket-team-name{ display:flex; align-items:center; gap:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bracket-divider{ height:1px; background:var(--panel-line); margin:1px 0; }
+  .bracket-score{ font-family:'Roboto Mono',monospace; font-weight:700; font-size:12.5px; flex-shrink:0; }
+
+  .group-strip{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin-bottom:22px;
+  }
+  .group-mini{ background:var(--bg2); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; }
+  .group-mini-title{ font-family:'Roboto Mono',monospace; font-size:11px; color:var(--gold-soft); margin-bottom:4px; }
+  .group-mini-team{ font-size:11.5px; padding:1px 0; display:flex; align-items:center; cursor:pointer; }
+  .group-mini-team:hover{ text-decoration:underline; text-decoration-color:var(--gold-soft); }
+
+  .third-place-box{ margin-top:20px; max-width:300px; }
+
   .team-select{
     width:100%; max-width:420px; background: var(--bg2); color:var(--cream);
     border:1px solid var(--panel-line); border-radius:10px; padding:11px 14px;
@@ -144,6 +177,46 @@
   @media(max-width:640px){
     .stat-grid{ grid-template-columns: repeat(2, 1fr); }
   }
+
+  .clickable-row{ cursor:pointer; }
+  td[data-team]{ cursor:pointer; }
+  td[data-team]:hover{ text-decoration: underline; text-decoration-color: var(--gold-soft); text-underline-offset:3px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; z-index:1000; padding:24px;
+    background: rgba(4,12,9,0.72); backdrop-filter: blur(3px);
+    display:none; align-items:center; justify-content:center;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    position:relative; background: var(--panel);
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,0.022) 0 34px, rgba(0,0,0,0.03) 34px 68px);
+    border:1px solid var(--panel-line); border-radius:18px;
+    max-width:640px; width:100%; max-height:85vh; overflow-y:auto; padding:26px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    animation: modalIn .16s ease-out;
+  }
+  .modal-box .panel{ margin-bottom:0; border:none; padding:0; background:none; }
+  @keyframes modalIn{ from{ opacity:0; transform:translateY(10px) scale(.97);} to{ opacity:1; transform:none;} }
+  .modal-close{
+    position:absolute; top:14px; left:14px; z-index:1;
+    width:32px; height:32px; border-radius:50%;
+    background: var(--bg2); border:1px solid var(--panel-line); color:var(--dim);
+    font-size:15px; cursor:pointer; line-height:1;
+  }
+  .modal-close:hover{ color:var(--cream); border-color:var(--gold-soft); }
+
+  .match-hero{ display:flex; align-items:center; justify-content:center; gap:18px; padding:10px 0 20px; text-align:center; }
+  .match-hero .side{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .match-hero .side img{ width:52px; height:auto; border-radius:4px; box-shadow:0 0 0 1px rgba(255,255,255,.12); }
+  .match-hero .side .name{ font-family:'Rubik',sans-serif; font-weight:700; font-size:15px; }
+  .match-hero .mid{ min-width:110px; }
+  .match-hero .mid .score{ font-size:30px; }
+  .match-hero .mid .vs{ font-family:'Roboto Mono',monospace; color:var(--dim2); font-size:13px; }
+
+  .player-hero{ display:flex; align-items:center; gap:16px; padding-bottom:18px; }
+  .player-hero img{ width:64px; height:64px; border-radius:50%; object-fit:cover; background:var(--bg2); box-shadow:0 0 0 1px rgba(255,255,255,.12); }
+  .player-hero h2{ margin:0 0 4px; }
 
   table{ width:100%; border-collapse:collapse; font-size:14px; }
   thead th{
@@ -199,6 +272,7 @@
     <button data-view="upcoming">משחקים קרובים</button>
     <button data-view="team">קבוצה</button>
     <button data-view="scorers">שחקנים</button>
+    <button data-view="bracket">עץ הטורניר</button>
   </nav>
 
   <div id="groupSelectWrap" class="group-select"></div>
@@ -210,6 +284,13 @@
     עודכן לאחרונה: <span id="lastUpdated">—</span><br>
     תמונת מצב שנוצרה על ידי fetch_worldcup.py. הרץ את הסקריפט שוב (או חכה לעדכון האוטומטי) בכל פעם שתרצה נתונים טריים.
   </footer>
+</div>
+
+<div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()" title="סגור" aria-label="סגור">✕</button>
+    <div id="modalContent"></div>
+  </div>
 </div>
 
 <script>
@@ -330,6 +411,17 @@ let upcomingAscending = true;   // ברירת מחדל: משחקים קרובי�
 let currentTeam = null;
 let currentStage = "ALL";
 
+// ---------- עץ הטורניר (bracket) ----------
+const BRACKET_STAGES = ["LAST_32","LAST_16","QUARTER_FINALS","SEMI_FINALS","FINAL"];
+const BRACKET_SIZES  = {LAST_32:16, LAST_16:8, QUARTER_FINALS:4, SEMI_FINALS:2, FINAL:1};
+const BRACKET_BOX_W = 172, BRACKET_BOX_H = 58, BRACKET_ROW_GAP = 14, BRACKET_COL_GAP = 64;
+
+// ברירת מחדל: כל שלבי הנוקאאוט מוצגים; שלב הבתים ומקום שלישי כבויים
+// (אפשר להדליק אותם - זו בדיוק הבקשה "לבחור מה להציג")
+let visibleStages = new Set(["LAST_32","LAST_16","QUARTER_FINALS","SEMI_FINALS","FINAL"]);
+let showGroupStage = false;
+let showThirdPlace = false;
+
 function fmtSigned(n){
   // מציג מספר עם סימן בסוף (2+ / 2-) כדי שיתאים לכיווניות עברית, לא -2/+2
   if(n>0) return n+'+';
@@ -398,7 +490,7 @@ function groupTable(g){
         <th>#</th><th>נבחרת</th><th class="num">נצ'</th><th class="num">תיקו</th><th class="num">הפ'</th><th class="num">נק'</th>
       </tr></thead>
       <tbody>
-        ${rows.map(r=>`<tr>
+        ${rows.map(r=>`<tr class="clickable-row" ${teamCellAttrs(r.team)}>
           <td class="num ${r.rank===1?'rank1':''}">${r.rank}</td>
           <td class="team ${r.rank===1?'rank1':''}">${flagImg(r.team)}${he(r.team)}</td>
           <td class="num">${r.w}</td>
@@ -443,11 +535,11 @@ function renderResults(){
     <table>
       <thead><tr><th>תאריך ושעה</th><th>בית</th><th class="num">תוצאה</th><th>חוץ</th><th class="num">שלב</th><th class="num">סטטוס</th></tr></thead>
       <tbody>
-        ${finals.length ? finals.map(g=>`<tr class="${g.status==='in_progress'?'live-row':''}">
+        ${finals.length ? finals.map(g=>`<tr class="clickable-row ${g.status==='in_progress'?'live-row':''}" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
           <td>${fmtDate(g.local)}</td>
-          <td class="team">${flagImg(g.home)}${he(g.home)}</td>
+          <td class="team" ${teamCellAttrs(g.home)}>${flagImg(g.home)}${he(g.home)}</td>
           <td class="num"><span class="score">${g.hs} – ${g.as}</span></td>
-          <td class="team">${flagImg(g.away)}${he(g.away)}</td>
+          <td class="team" ${teamCellAttrs(g.away)}>${flagImg(g.away)}${he(g.away)}</td>
           <td class="num" style="font-size:11.5px; color:var(--dim);">${g.stageLabel||''}</td>
           <td class="num">${g.status==='in_progress' ? '<span class="status-live">חי ●</span>' : '<span class="status-final">הסתיים</span>'}</td>
         </tr>`).join('') : `<tr><td colspan="6" style="text-align:center; color:var(--dim); padding:20px;">אין תוצאות בשלב הזה</td></tr>`}
@@ -492,10 +584,10 @@ function renderUpcoming(){
     <table>
       <thead><tr><th>תאריך ושעה</th><th>בית</th><th>חוץ</th><th class="num">שלב</th><th>סיכויים (בית / תיקו / חוץ)</th></tr></thead>
       <tbody>
-        ${upc.length ? upc.map(g=>`<tr>
+        ${upc.length ? upc.map(g=>`<tr class="clickable-row" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
           <td>${fmtDate(g.local)}</td>
-          <td class="team">${flagImg(g.home)}${he(g.home)}</td>
-          <td class="team">${flagImg(g.away)}${he(g.away)}</td>
+          <td class="team" ${teamCellAttrs(g.home)}>${flagImg(g.home)}${he(g.home)}</td>
+          <td class="team" ${teamCellAttrs(g.away)}>${flagImg(g.away)}${he(g.away)}</td>
           <td class="num" style="font-size:11.5px; color:var(--dim);">${g.stageLabel||''}</td>
           <td>
             ${g.p ? `<div style="display:flex;align-items:center;gap:8px;">
@@ -537,6 +629,56 @@ function teamAggStats(teamEn){
   return { played: finished.length, gf, ga, gd: gf-ga, w, d, l, pts: w*3+d };
 }
 
+function teamProfileHTML(teamEn){
+  const st = standings.find(s=>s.team===teamEn);
+  const agg = teamAggStats(teamEn);
+  const matches = teamMatches(teamEn)
+    .map((g,i)=>({...g, _i:i}))
+    .sort((a,b)=>gameTime(a,a._i)-gameTime(b,b._i));
+
+  return `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>${flagImg(teamEn, 26)}${he(teamEn)}</h2>
+        <div class="desc">${st ? `בית ${st.group} · מקום ${st.rank} מתוך 4` : 'אין נתוני טבלה עבור נבחרת זו'}</div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num">${agg.played}</div><div class="stat-label">משחקים ששוחקו</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.w}</div><div class="stat-label">נצחונות</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.d}</div><div class="stat-label">תיקו</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.l}</div><div class="stat-label">הפסדים</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.gf}</div><div class="stat-label">שערי זכות</div></div>
+      <div class="stat-box"><div class="stat-num">${agg.ga}</div><div class="stat-label">שערי חובה</div></div>
+      <div class="stat-box"><div class="stat-num">${fmtSigned(agg.gd)}</div><div class="stat-label">הפרש שערים</div></div>
+      <div class="stat-box gold"><div class="stat-num">${agg.pts}</div><div class="stat-label">נקודות</div></div>
+    </div>
+    <div class="desc" style="margin:-10px 0 16px;">הטבלה למטה כוללת גם משחקים עתידיים - לכן ייתכן שיהיו בה יותר שורות ממספר "משחקים ששוחקו" למעלה. הנקודות כאן מחושבות מתוצאות המשחקים ועשויות להיבדל מעט מדירוג הבית הרשמי, שמתעדכן לפעמים באיחור אצל football-data.org.</div>
+    <table>
+      <thead><tr><th>תאריך ושעה</th><th>יריבה</th><th class="num">מקום</th><th class="num">תוצאה</th><th class="num">סטטוס</th></tr></thead>
+      <tbody>
+        ${matches.map(g=>{
+          const isHome = g.home===teamEn;
+          const opp = isHome ? g.away : g.home;
+          const played = g.status==='final' || g.status==='in_progress';
+          const scoreTxt = played ? (isHome ? `${g.hs} – ${g.as}` : `${g.as} – ${g.hs}`) : '—';
+          const statusTxt = g.status==='in_progress' ? '<span class="status-live">חי ●</span>'
+                            : g.status==='final' ? '<span class="status-final">הסתיים</span>'
+                            : '<span class="status-sched">מתוכנן</span>';
+          return `<tr class="clickable-row ${g.status==='in_progress'?'live-row':''}" data-game-idx="${g._i}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק">
+            <td>${fmtDate(g.local)}</td>
+            <td class="team" ${teamCellAttrs(opp)}>${flagImg(opp)}${he(opp)}</td>
+            <td class="num">${isHome ? 'בית' : 'חוץ'}</td>
+            <td class="num"><span class="score">${scoreTxt}</span></td>
+            <td class="num">${statusTxt}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    ${unknownTeamsFootnote(matches)}
+  </div>`;
+}
+
 function selectTeam(teamEn){ currentTeam = teamEn || null; renderTeamView(); }
 
 function renderTeamView(){
@@ -561,53 +703,7 @@ function renderTeamView(){
   </div>`;
 
   if(currentTeam){
-    const st = standings.find(s=>s.team===currentTeam);
-    const agg = teamAggStats(currentTeam);
-    const matches = teamMatches(currentTeam)
-      .map((g,i)=>({...g, _i:i}))
-      .sort((a,b)=>gameTime(a,a._i)-gameTime(b,b._i));
-
-    html += `<div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>${flagImg(currentTeam, 26)}${he(currentTeam)}</h2>
-          <div class="desc">${st ? `בית ${st.group} · מקום ${st.rank} מתוך 4` : 'אין נתוני טבלה עבור נבחרת זו'}</div>
-        </div>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-box"><div class="stat-num">${agg.played}</div><div class="stat-label">משחקים ששוחקו</div></div>
-        <div class="stat-box"><div class="stat-num">${agg.w}</div><div class="stat-label">נצחונות</div></div>
-        <div class="stat-box"><div class="stat-num">${agg.d}</div><div class="stat-label">תיקו</div></div>
-        <div class="stat-box"><div class="stat-num">${agg.l}</div><div class="stat-label">הפסדים</div></div>
-        <div class="stat-box"><div class="stat-num">${agg.gf}</div><div class="stat-label">שערי זכות</div></div>
-        <div class="stat-box"><div class="stat-num">${agg.ga}</div><div class="stat-label">שערי חובה</div></div>
-        <div class="stat-box"><div class="stat-num">${fmtSigned(agg.gd)}</div><div class="stat-label">הפרש שערים</div></div>
-        <div class="stat-box gold"><div class="stat-num">${agg.pts}</div><div class="stat-label">נקודות</div></div>
-      </div>
-      <div class="desc" style="margin:-10px 0 16px;">הטבלה למטה כוללת גם משחקים עתידיים - לכן ייתכן שיהיו בה יותר שורות ממספר "משחקים ששוחקו" למעלה. הנקודות כאן מחושבות מתוצאות המשחקים ועשויות להיבדל מעט מדירוג הבית הרשמי, שמתעדכן לפעמים באיחור אצל football-data.org.</div>
-      <table>
-        <thead><tr><th>תאריך ושעה</th><th>יריבה</th><th class="num">מקום</th><th class="num">תוצאה</th><th class="num">סטטוס</th></tr></thead>
-        <tbody>
-          ${matches.map(g=>{
-            const isHome = g.home===currentTeam;
-            const opp = isHome ? g.away : g.home;
-            const played = g.status==='final' || g.status==='in_progress';
-            const scoreTxt = played ? (isHome ? `${g.hs} – ${g.as}` : `${g.as} – ${g.hs}`) : '—';
-            const statusTxt = g.status==='in_progress' ? '<span class="status-live">חי ●</span>'
-                              : g.status==='final' ? '<span class="status-final">הסתיים</span>'
-                              : '<span class="status-sched">מתוכנן</span>';
-            return `<tr class="${g.status==='in_progress'?'live-row':''}">
-              <td>${fmtDate(g.local)}</td>
-              <td class="team">${flagImg(opp)}${he(opp)}</td>
-              <td class="num">${isHome ? 'בית' : 'חוץ'}</td>
-              <td class="num"><span class="score">${scoreTxt}</span></td>
-              <td class="num">${statusTxt}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-      ${unknownTeamsFootnote(matches)}
-    </div>`;
+    html += teamProfileHTML(currentTeam);
   }
 
   document.getElementById('content').innerHTML = html;
@@ -662,11 +758,11 @@ function renderTopScorersTable(){
         <th class="num">שערים</th><th class="num">בישולים</th><th class="num">הופעות</th><th class="num">כרטיסים</th>
       </tr></thead>
       <tbody>
-        ${filtered.length ? filtered.map(p=>`<tr>
+        ${filtered.length ? filtered.map(p=>`<tr class="clickable-row" data-player-idx="${scorers.indexOf(p)}" ondblclick="handlePlayerDblClick('scorers', this)" title="לחיצה כפולה לפרטי השחקן">
           <td class="num">${avatarCell(p.photo)}</td>
           <td class="num">${p.rank}</td>
           <td class="team">${p.name || '—'}</td>
-          <td class="team">${flagImg(p.team)}${he(p.team) || '—'}</td>
+          <td class="team" ${teamCellAttrs(p.team)}>${flagImg(p.team)}${he(p.team) || '—'}</td>
           <td style="font-size:12.5px; color:var(--dim);">${p.position || '—'}</td>
           <td class="num">${p.age ?? '—'}</td>
           <td class="num"><b>${p.goals}</b></td>
@@ -706,11 +802,11 @@ function renderAllPlayersTable(){
     <table>
       <thead><tr><th class="num">תמונה</th><th>#</th><th>שחקן</th><th>נבחרת</th><th>עמדה</th><th class="num">גיל</th><th class="num">מספר</th></tr></thead>
       <tbody>
-        ${filtered.length ? filtered.map((p,i)=>`<tr>
+        ${filtered.length ? filtered.map((p,i)=>`<tr class="clickable-row" data-player-idx="${allPlayers.indexOf(p)}" ondblclick="handlePlayerDblClick('all', this)" title="לחיצה כפולה לפרטי השחקן">
           <td class="num">${avatarCell(p.photo)}</td>
           <td class="num">${i+1}</td>
           <td class="team">${p.name || '—'}</td>
-          <td class="team">${flagImg(p.team)}${he(p.team) || '—'}</td>
+          <td class="team" ${teamCellAttrs(p.team)}>${flagImg(p.team)}${he(p.team) || '—'}</td>
           <td style="font-size:12.5px; color:var(--dim);">${p.position || '—'}</td>
           <td class="num">${p.age ?? '—'}</td>
           <td class="num">${p.number ?? '—'}</td>
@@ -747,6 +843,170 @@ function renderScorers(){
   document.getElementById('scorersModeToggle').checked = (scorersMode==='all');
 }
 
+// ---------- עץ הטורניר: חישוב גיאומטריה ----------
+function computeBracketLayout(){
+  const layout = {};
+  let prevYs = null;
+  BRACKET_STAGES.forEach((stage, roundIdx)=>{
+    const n = BRACKET_SIZES[stage];
+    let ys;
+    if(roundIdx===0){
+      ys = Array.from({length:n}, (_,i)=> i*(BRACKET_BOX_H+BRACKET_ROW_GAP) + BRACKET_BOX_H/2);
+    } else {
+      ys = Array.from({length:n}, (_,i)=> (prevYs[2*i] + prevYs[2*i+1]) / 2);
+    }
+    layout[stage] = ys;
+    prevYs = ys;
+  });
+  return layout;
+}
+
+function stageGamesPadded(stage){
+  // ממלא "רבועים ריקים" (null) בכל מקום שאין עדיין משחק אמיתי לאותו סלוט,
+  // כך שצורת העץ תמיד שלמה - בדיוק כמו שביקשת.
+  const size = BRACKET_SIZES[stage];
+  const matches = games
+    .map((g,i)=>({...g, _gidx:i}))
+    .filter(g=>g.stage===stage);
+  const padded = [];
+  for(let i=0;i<size;i++) padded.push(matches[i] || null);
+  return padded;
+}
+
+function findPrevVisibleGroup(roundIdx, matchIdx){
+  // מוצא את הסבב הקודם *שמוצג כרגע* (מדלג על סבבים שכובו), ומחזיר את
+  // כל אינדקסי המשחקים באותו סבב שמזינים את התיבה הנוכחית.
+  // חשוב: מרחיבים (expand) קודם לרמת הסבב r, ורק אז בודקים אם r גלוי -
+  // אחרת הבדיקה נעשית ברמה אחת רדודה מדי ומחזירה אינדקסים שגויים.
+  let candidates = [matchIdx];
+  for(let r = roundIdx-1; r>=0; r--){
+    candidates = candidates.flatMap(i=>[2*i, 2*i+1]);
+    if(visibleStages.has(BRACKET_STAGES[r])){
+      return { roundIdx:r, indices:candidates };
+    }
+  }
+  return null;
+}
+
+function bracketBoxHTML(entry, x, y){
+  const hasGame = !!entry;
+  const home = hasGame ? entry.home : null;
+  const away = hasGame ? entry.away : null;
+  const played = hasGame && (entry.status==='final' || entry.status==='in_progress');
+  const attrs = hasGame ? `data-game-idx="${entry._gidx}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק"` : '';
+  const rowHTML = (team, score) => `<div class="bracket-team">
+      <span class="bracket-team-name">${team ? flagImg(team,14) : ''}${team ? he(team) : 'טרם ידועה'}</span>
+      ${played ? `<span class="bracket-score">${score}</span>` : ''}
+    </div>`;
+  const isLive = hasGame && entry.status==='in_progress';
+  return `<div class="bracket-box ${hasGame?'clickable-row':''} ${!home&&!away?'bracket-box-empty':''} ${isLive?'bracket-box-live':''}"
+            style="left:${x}px; top:${y - BRACKET_BOX_H/2}px; width:${BRACKET_BOX_W}px; height:${BRACKET_BOX_H}px;"
+            ${attrs}>
+    ${rowHTML(home, hasGame?entry.hs:null)}
+    <div class="bracket-divider"></div>
+    ${rowHTML(away, hasGame?entry.as:null)}
+  </div>`;
+}
+
+function groupStripHTML(){
+  const groups = [...new Set(standings.map(s=>s.group))].sort();
+  if(!groups.length) return '<div class="desc">אין נתוני בתים.</div>';
+  return `<div class="group-strip">
+    ${groups.map(g=>{
+      const rows = standings.filter(s=>s.group===g).sort((a,b)=>a.rank-b.rank);
+      return `<div class="group-mini">
+        <div class="group-mini-title">בית ${g}</div>
+        ${rows.map(r=>`<div class="group-mini-team" ${teamCellAttrs(r.team)}>${flagImg(r.team,14)}${he(r.team)}</div>`).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function thirdPlaceHTML(){
+  const entries = stageGamesPadded('THIRD_PLACE');
+  const entry = entries[0];
+  const layout = { 'THIRD_PLACE':[BRACKET_BOX_H/2] };
+  return `<div class="third-place-box">
+    <div class="desc" style="margin-bottom:8px;">משחק על מקום שלישי</div>
+    <div style="position:relative; height:${BRACKET_BOX_H}px;">
+      ${bracketBoxHTML(entry, 0, BRACKET_BOX_H/2)}
+    </div>
+  </div>`;
+}
+
+function toggleBracketStage(stage, checked){
+  if(checked) visibleStages.add(stage); else visibleStages.delete(stage);
+  renderBracketView();
+}
+function toggleGroupStrip(checked){ showGroupStage = checked; renderBracketView(); }
+function toggleThirdPlace(checked){ showThirdPlace = checked; renderBracketView(); }
+
+const BRACKET_STAGE_LABELS_HE = {
+  LAST_32:"שלב ה-32", LAST_16:"שמינית גמר", QUARTER_FINALS:"רבע גמר",
+  SEMI_FINALS:"חצי גמר", FINAL:"גמר"
+};
+
+function renderBracketView(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='none';
+
+  const layout = computeBracketLayout();
+  const visibleList = BRACKET_STAGES.filter(s=>visibleStages.has(s));
+
+  const colX = {};
+  visibleList.forEach((stage, colIdx)=>{ colX[stage] = colIdx * (BRACKET_BOX_W + BRACKET_COL_GAP); });
+
+  let boxesHTML = '', linesHTML = '';
+  visibleList.forEach(stage=>{
+    const roundIdx = BRACKET_STAGES.indexOf(stage);
+    const entries = stageGamesPadded(stage);
+    const ys = layout[stage];
+    entries.forEach((entry, i)=>{
+      const x = colX[stage], y = ys[i];
+      boxesHTML += bracketBoxHTML(entry, x, y);
+      const prevGroup = findPrevVisibleGroup(roundIdx, i);
+      if(prevGroup){
+        const prevX = colX[BRACKET_STAGES[prevGroup.roundIdx]] + BRACKET_BOX_W;
+        const prevYsArr = layout[BRACKET_STAGES[prevGroup.roundIdx]];
+        prevGroup.indices.forEach(pi=>{
+          const py = prevYsArr[pi];
+          const midX = (prevX + x) / 2;
+          linesHTML += `<path d="M ${prevX} ${py} H ${midX} V ${y} H ${x}" stroke="rgba(243,239,228,0.22)" stroke-width="2" fill="none"/>`;
+        });
+      }
+    });
+  });
+
+  const totalWidth = visibleList.length ? colX[visibleList[visibleList.length-1]] + BRACKET_BOX_W + 10 : 300;
+  const totalHeight = BRACKET_SIZES.LAST_32 * (BRACKET_BOX_H + BRACKET_ROW_GAP) + 10;
+
+  const toggles = BRACKET_STAGES.map(stage=>
+    `<label><input type="checkbox" ${visibleStages.has(stage)?'checked':''} onchange="toggleBracketStage('${stage}', this.checked)"> ${BRACKET_STAGE_LABELS_HE[stage]}</label>`
+  ).join('');
+
+  document.getElementById('content').innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>עץ הטורניר</h2>
+        <div class="desc">לחיצה כפולה על משחק - פרטים מלאים · תיבה מקווקוות = הקבוצות טרם נקבעו</div>
+      </div>
+    </div>
+    <div class="bracket-toggles">
+      ${toggles}
+      <label><input type="checkbox" ${showGroupStage?'checked':''} onchange="toggleGroupStrip(this.checked)"> שלב הבתים</label>
+      <label><input type="checkbox" ${showThirdPlace?'checked':''} onchange="toggleThirdPlace(this.checked)"> מקום שלישי</label>
+    </div>
+    ${showGroupStage ? groupStripHTML() : ''}
+    ${visibleList.length ? `<div class="bracket-scroll">
+      <div class="bracket-container" style="width:${totalWidth}px; height:${totalHeight}px;">
+        <svg width="${totalWidth}" height="${totalHeight}" style="position:absolute; top:0; left:0; pointer-events:none;">${linesHTML}</svg>
+        ${boxesHTML}
+      </div>
+    </div>` : '<div class="desc">בחר לפחות שלב נוקאאוט אחד להצגה.</div>'}
+    ${showThirdPlace ? thirdPlaceHTML() : ''}
+  </div>`;
+}
+
 function render(){
   renderGroupSelect();
   renderStageSelect();
@@ -755,7 +1015,8 @@ function render(){
   else if(view==='results') renderResults();
   else if(view==='upcoming') renderUpcoming();
   else if(view==='team') renderTeamView();
-  else renderScorers();
+  else if(view==='scorers') renderScorers();
+  else renderBracketView();
 }
 
 document.querySelectorAll('#mainNav button').forEach(btn=>{
@@ -776,6 +1037,112 @@ function unknownTeamsFootnote(list){
   const hasUnknown = list.some(g=>!g.home || !g.away);
   if(!hasUnknown) return '';
   return `<div class="desc" style="margin-top:14px; margin-bottom:0;">* טרם ידועה - בשלב זה הקבוצות המשתתפות אינן ידועות.</div>`;
+}
+
+// ---------- לחיצה כפולה (MDC): דשבורדים למשחק / שחקן / קבוצה ----------
+function openModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.addEventListener('keydown', modalEscHandler);
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.removeEventListener('keydown', modalEscHandler);
+}
+function modalEscHandler(e){ if(e.key==='Escape') closeModal(); }
+
+function handleTeamDblClick(ev, cellEl){
+  ev.stopPropagation(); // כדי שלא תיפתח גם דשבורד המשחק של השורה שמסביב
+  const team = cellEl.dataset.team;
+  if(team) openModal(teamProfileHTML(team));
+}
+
+function teamCellAttrs(name){
+  // רק אם יש שם קבוצה אמיתי - אחרת "null" היה נכנס כמחרוזת ממש לתוך
+  // ה-attribute וגורם בדיוק לאותה תקלת "null" שכבר תיקנו בעבר.
+  return name ? `data-team="${name}" ondblclick="handleTeamDblClick(event, this)" title="לחיצה כפולה לפרטי הנבחרת"` : '';
+}
+
+function handleGameDblClick(rowEl){
+  const idx = parseInt(rowEl.dataset.gameIdx, 10);
+  const g = games[idx];
+  if(g) openModal(gameProfileHTML(g));
+}
+
+function handlePlayerDblClick(source, rowEl){
+  const idx = parseInt(rowEl.dataset.playerIdx, 10);
+  const p = source==='scorers' ? scorers[idx] : allPlayers[idx];
+  if(p) openModal(playerProfileHTML(p, source));
+}
+
+function gameProfileHTML(g){
+  const played = g.status==='final' || g.status==='in_progress';
+  const statusTxt = g.status==='in_progress' ? '<span class="status-live">חי ●</span>'
+                    : g.status==='final' ? '<span class="status-final">הסתיים</span>'
+                    : '<span class="status-sched">מתוכנן</span>';
+  const homeSt = g.home ? standings.find(s=>s.team===g.home) : null;
+  const awaySt = g.away ? standings.find(s=>s.team===g.away) : null;
+
+  return `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>פרטי משחק</h2>
+        <div class="desc">${g.stageLabel || ''}${g.stageLabel ? ' · ' : ''}${fmtDate(g.local)}</div>
+      </div>
+    </div>
+    <div class="match-hero">
+      <div class="side">
+        ${g.home ? flagImg(g.home, 44) : ''}
+        <div class="name">${he(g.home)}</div>
+        ${homeSt ? `<div class="desc" style="margin:0;">בית ${homeSt.group} · מקום ${homeSt.rank}</div>` : ''}
+      </div>
+      <div class="mid">
+        ${played
+          ? `<div class="score" style="font-size:30px;">${g.hs} – ${g.as}</div>`
+          : `<div class="vs">VS</div>`}
+        <div style="margin-top:6px;">${statusTxt}</div>
+      </div>
+      <div class="side">
+        ${g.away ? flagImg(g.away, 44) : ''}
+        <div class="name">${he(g.away)}</div>
+        ${awaySt ? `<div class="desc" style="margin:0;">בית ${awaySt.group} · מקום ${awaySt.rank}</div>` : ''}
+      </div>
+    </div>
+    ${g.p ? `<div class="desc" style="text-align:center; margin-bottom:10px;">סיכויי ניצחון (בית / תיקו / חוץ): ${g.p.h}% / ${g.p.d}% / ${g.p.a}%</div>` : ''}
+    ${unknownTeamsFootnote([g])}
+  </div>`;
+}
+
+function playerProfileHTML(p, source){
+  const isScorer = source==='scorers';
+  return `<div class="panel">
+    <div class="player-hero">
+      ${p.photo ? `<img src="${p.photo}" alt="" onerror="this.style.display='none';">` : ''}
+      <div>
+        <h2>${p.name || 'שחקן'}</h2>
+        <div class="desc" style="margin:0;">
+          ${flagImg(p.team)}${he(p.team) || ''}${p.position ? ' · ' + p.position : ''}${p.age ? ' · גיל ' + p.age : ''}
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid" style="grid-template-columns: repeat(${isScorer?4:3}, 1fr);">
+      ${isScorer ? `
+        <div class="stat-box gold"><div class="stat-num">${p.goals}</div><div class="stat-label">שערים</div></div>
+        <div class="stat-box"><div class="stat-num">${p.assists}</div><div class="stat-label">בישולים</div></div>
+        <div class="stat-box"><div class="stat-num">${p.appearances}</div><div class="stat-label">הופעות</div></div>
+        <div class="stat-box"><div class="stat-num">${p.minutes ?? '—'}</div><div class="stat-label">דקות</div></div>
+      ` : `
+        <div class="stat-box"><div class="stat-num">${p.number ?? '—'}</div><div class="stat-label">מספר</div></div>
+        <div class="stat-box"><div class="stat-num">${p.position || '—'}</div><div class="stat-label">עמדה</div></div>
+        <div class="stat-box"><div class="stat-num">${p.age ?? '—'}</div><div class="stat-label">גיל</div></div>
+      `}
+    </div>
+    ${isScorer && (p.yellow || p.red) ? `<div class="desc" style="text-align:center;">
+      ${p.yellow ? `<span style="color:#e0c23b;">■</span> ${p.yellow} צהובים ` : ''}
+      ${p.red ? `<span style="color:var(--live);">■</span> ${p.red} אדומים` : ''}
+    </div>` : ''}
+    ${!isScorer ? `<div class="desc" style="text-align:center;">נתוני שערים/הופעות זמינים רק עבור מלכי השערים, לא עבור כל השחקנים.</div>` : ''}
+  </div>`;
 }
 
 // ticker: show the live game if any

@@ -123,6 +123,39 @@
   .sort-toggle input{ accent-color:var(--gold); cursor:pointer; width:15px; height:15px; }
   .sort-toggle:hover{ color:var(--cream); }
 
+  .bracket-toggles{
+    display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--dim);
+  }
+  .bracket-toggles label{ display:flex; align-items:center; gap:5px; cursor:pointer; user-select:none; }
+  .bracket-toggles label:hover{ color:var(--cream); }
+  .bracket-toggles input{ accent-color:var(--gold); cursor:pointer; }
+
+  .bracket-scroll{ overflow-x:auto; padding-bottom:14px; }
+  .bracket-container{ position:relative; direction:ltr; }
+  .bracket-box{
+    position:absolute; background:var(--bg2); border:1px solid var(--panel-line); border-radius:8px;
+    display:flex; flex-direction:column; justify-content:center; padding:4px 10px; box-sizing:border-box;
+    direction:rtl;
+  }
+  .bracket-box.clickable-row{ cursor:pointer; }
+  .bracket-box.clickable-row:hover{ border-color:var(--gold-soft); }
+  .bracket-box-empty{ border-style:dashed; opacity:0.6; }
+  .bracket-box-live{ border-color:var(--live); }
+  .bracket-team{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; padding:3px 0; gap:6px; }
+  .bracket-team-name{ display:flex; align-items:center; gap:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bracket-divider{ height:1px; background:var(--panel-line); margin:1px 0; }
+  .bracket-score{ font-family:'Roboto Mono',monospace; font-weight:700; font-size:12.5px; flex-shrink:0; }
+
+  .group-strip{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; margin-bottom:22px;
+  }
+  .group-mini{ background:var(--bg2); border:1px solid var(--panel-line); border-radius:8px; padding:8px 10px; }
+  .group-mini-title{ font-family:'Roboto Mono',monospace; font-size:11px; color:var(--gold-soft); margin-bottom:4px; }
+  .group-mini-team{ font-size:11.5px; padding:1px 0; display:flex; align-items:center; cursor:pointer; }
+  .group-mini-team:hover{ text-decoration:underline; text-decoration-color:var(--gold-soft); }
+
+  .third-place-box{ margin-top:20px; max-width:300px; }
+
   .team-select{
     width:100%; max-width:420px; background: var(--bg2); color:var(--cream);
     border:1px solid var(--panel-line); border-radius:10px; padding:11px 14px;
@@ -239,6 +272,7 @@
     <button data-view="upcoming">משחקים קרובים</button>
     <button data-view="team">קבוצה</button>
     <button data-view="scorers">שחקנים</button>
+    <button data-view="bracket">עץ הטורניר</button>
   </nav>
 
   <div id="groupSelectWrap" class="group-select"></div>
@@ -347,6 +381,17 @@ let resultsAscending = false;   // ברירת מחדל: תוצאות - מהחד�
 let upcomingAscending = true;   // ברירת מחדל: משחקים קרובים - מהקרוב לרחוק (עולה)
 let currentTeam = null;
 let currentStage = "ALL";
+
+// ---------- עץ הטורניר (bracket) ----------
+const BRACKET_STAGES = ["LAST_32","LAST_16","QUARTER_FINALS","SEMI_FINALS","FINAL"];
+const BRACKET_SIZES  = {LAST_32:16, LAST_16:8, QUARTER_FINALS:4, SEMI_FINALS:2, FINAL:1};
+const BRACKET_BOX_W = 172, BRACKET_BOX_H = 58, BRACKET_ROW_GAP = 14, BRACKET_COL_GAP = 64;
+
+// ברירת מחדל: כל שלבי הנוקאאוט מוצגים; שלב הבתים ומקום שלישי כבויים
+// (אפשר להדליק אותם - זו בדיוק הבקשה "לבחור מה להציג")
+let visibleStages = new Set(["LAST_32","LAST_16","QUARTER_FINALS","SEMI_FINALS","FINAL"]);
+let showGroupStage = false;
+let showThirdPlace = false;
 
 function fmtSigned(n){
   // מציג מספר עם סימן בסוף (2+ / 2-) כדי שיתאים לכיווניות עברית, לא -2/+2
@@ -769,6 +814,170 @@ function renderScorers(){
   document.getElementById('scorersModeToggle').checked = (scorersMode==='all');
 }
 
+// ---------- עץ הטורניר: חישוב גיאומטריה ----------
+function computeBracketLayout(){
+  const layout = {};
+  let prevYs = null;
+  BRACKET_STAGES.forEach((stage, roundIdx)=>{
+    const n = BRACKET_SIZES[stage];
+    let ys;
+    if(roundIdx===0){
+      ys = Array.from({length:n}, (_,i)=> i*(BRACKET_BOX_H+BRACKET_ROW_GAP) + BRACKET_BOX_H/2);
+    } else {
+      ys = Array.from({length:n}, (_,i)=> (prevYs[2*i] + prevYs[2*i+1]) / 2);
+    }
+    layout[stage] = ys;
+    prevYs = ys;
+  });
+  return layout;
+}
+
+function stageGamesPadded(stage){
+  // ממלא "רבועים ריקים" (null) בכל מקום שאין עדיין משחק אמיתי לאותו סלוט,
+  // כך שצורת העץ תמיד שלמה - בדיוק כמו שביקשת.
+  const size = BRACKET_SIZES[stage];
+  const matches = games
+    .map((g,i)=>({...g, _gidx:i}))
+    .filter(g=>g.stage===stage);
+  const padded = [];
+  for(let i=0;i<size;i++) padded.push(matches[i] || null);
+  return padded;
+}
+
+function findPrevVisibleGroup(roundIdx, matchIdx){
+  // מוצא את הסבב הקודם *שמוצג כרגע* (מדלג על סבבים שכובו), ומחזיר את
+  // כל אינדקסי המשחקים באותו סבב שמזינים את התיבה הנוכחית.
+  // חשוב: מרחיבים (expand) קודם לרמת הסבב r, ורק אז בודקים אם r גלוי -
+  // אחרת הבדיקה נעשית ברמה אחת רדודה מדי ומחזירה אינדקסים שגויים.
+  let candidates = [matchIdx];
+  for(let r = roundIdx-1; r>=0; r--){
+    candidates = candidates.flatMap(i=>[2*i, 2*i+1]);
+    if(visibleStages.has(BRACKET_STAGES[r])){
+      return { roundIdx:r, indices:candidates };
+    }
+  }
+  return null;
+}
+
+function bracketBoxHTML(entry, x, y){
+  const hasGame = !!entry;
+  const home = hasGame ? entry.home : null;
+  const away = hasGame ? entry.away : null;
+  const played = hasGame && (entry.status==='final' || entry.status==='in_progress');
+  const attrs = hasGame ? `data-game-idx="${entry._gidx}" ondblclick="handleGameDblClick(this)" title="לחיצה כפולה לפרטי המשחק"` : '';
+  const rowHTML = (team, score) => `<div class="bracket-team">
+      <span class="bracket-team-name">${team ? flagImg(team,14) : ''}${team ? he(team) : 'טרם ידועה'}</span>
+      ${played ? `<span class="bracket-score">${score}</span>` : ''}
+    </div>`;
+  const isLive = hasGame && entry.status==='in_progress';
+  return `<div class="bracket-box ${hasGame?'clickable-row':''} ${!home&&!away?'bracket-box-empty':''} ${isLive?'bracket-box-live':''}"
+            style="left:${x}px; top:${y - BRACKET_BOX_H/2}px; width:${BRACKET_BOX_W}px; height:${BRACKET_BOX_H}px;"
+            ${attrs}>
+    ${rowHTML(home, hasGame?entry.hs:null)}
+    <div class="bracket-divider"></div>
+    ${rowHTML(away, hasGame?entry.as:null)}
+  </div>`;
+}
+
+function groupStripHTML(){
+  const groups = [...new Set(standings.map(s=>s.group))].sort();
+  if(!groups.length) return '<div class="desc">אין נתוני בתים.</div>';
+  return `<div class="group-strip">
+    ${groups.map(g=>{
+      const rows = standings.filter(s=>s.group===g).sort((a,b)=>a.rank-b.rank);
+      return `<div class="group-mini">
+        <div class="group-mini-title">בית ${g}</div>
+        ${rows.map(r=>`<div class="group-mini-team" ${teamCellAttrs(r.team)}>${flagImg(r.team,14)}${he(r.team)}</div>`).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function thirdPlaceHTML(){
+  const entries = stageGamesPadded('THIRD_PLACE');
+  const entry = entries[0];
+  const layout = { 'THIRD_PLACE':[BRACKET_BOX_H/2] };
+  return `<div class="third-place-box">
+    <div class="desc" style="margin-bottom:8px;">משחק על מקום שלישי</div>
+    <div style="position:relative; height:${BRACKET_BOX_H}px;">
+      ${bracketBoxHTML(entry, 0, BRACKET_BOX_H/2)}
+    </div>
+  </div>`;
+}
+
+function toggleBracketStage(stage, checked){
+  if(checked) visibleStages.add(stage); else visibleStages.delete(stage);
+  renderBracketView();
+}
+function toggleGroupStrip(checked){ showGroupStage = checked; renderBracketView(); }
+function toggleThirdPlace(checked){ showThirdPlace = checked; renderBracketView(); }
+
+const BRACKET_STAGE_LABELS_HE = {
+  LAST_32:"שלב ה-32", LAST_16:"שמינית גמר", QUARTER_FINALS:"רבע גמר",
+  SEMI_FINALS:"חצי גמר", FINAL:"גמר"
+};
+
+function renderBracketView(){
+  document.getElementById('groupSelectWrap').style.display='none';
+  document.getElementById('stageSelectWrap').style.display='none';
+
+  const layout = computeBracketLayout();
+  const visibleList = BRACKET_STAGES.filter(s=>visibleStages.has(s));
+
+  const colX = {};
+  visibleList.forEach((stage, colIdx)=>{ colX[stage] = colIdx * (BRACKET_BOX_W + BRACKET_COL_GAP); });
+
+  let boxesHTML = '', linesHTML = '';
+  visibleList.forEach(stage=>{
+    const roundIdx = BRACKET_STAGES.indexOf(stage);
+    const entries = stageGamesPadded(stage);
+    const ys = layout[stage];
+    entries.forEach((entry, i)=>{
+      const x = colX[stage], y = ys[i];
+      boxesHTML += bracketBoxHTML(entry, x, y);
+      const prevGroup = findPrevVisibleGroup(roundIdx, i);
+      if(prevGroup){
+        const prevX = colX[BRACKET_STAGES[prevGroup.roundIdx]] + BRACKET_BOX_W;
+        const prevYsArr = layout[BRACKET_STAGES[prevGroup.roundIdx]];
+        prevGroup.indices.forEach(pi=>{
+          const py = prevYsArr[pi];
+          const midX = (prevX + x) / 2;
+          linesHTML += `<path d="M ${prevX} ${py} H ${midX} V ${y} H ${x}" stroke="rgba(243,239,228,0.22)" stroke-width="2" fill="none"/>`;
+        });
+      }
+    });
+  });
+
+  const totalWidth = visibleList.length ? colX[visibleList[visibleList.length-1]] + BRACKET_BOX_W + 10 : 300;
+  const totalHeight = BRACKET_SIZES.LAST_32 * (BRACKET_BOX_H + BRACKET_ROW_GAP) + 10;
+
+  const toggles = BRACKET_STAGES.map(stage=>
+    `<label><input type="checkbox" ${visibleStages.has(stage)?'checked':''} onchange="toggleBracketStage('${stage}', this.checked)"> ${BRACKET_STAGE_LABELS_HE[stage]}</label>`
+  ).join('');
+
+  document.getElementById('content').innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>עץ הטורניר</h2>
+        <div class="desc">לחיצה כפולה על משחק - פרטים מלאים · תיבה מקווקוות = הקבוצות טרם נקבעו</div>
+      </div>
+    </div>
+    <div class="bracket-toggles">
+      ${toggles}
+      <label><input type="checkbox" ${showGroupStage?'checked':''} onchange="toggleGroupStrip(this.checked)"> שלב הבתים</label>
+      <label><input type="checkbox" ${showThirdPlace?'checked':''} onchange="toggleThirdPlace(this.checked)"> מקום שלישי</label>
+    </div>
+    ${showGroupStage ? groupStripHTML() : ''}
+    ${visibleList.length ? `<div class="bracket-scroll">
+      <div class="bracket-container" style="width:${totalWidth}px; height:${totalHeight}px;">
+        <svg width="${totalWidth}" height="${totalHeight}" style="position:absolute; top:0; left:0; pointer-events:none;">${linesHTML}</svg>
+        ${boxesHTML}
+      </div>
+    </div>` : '<div class="desc">בחר לפחות שלב נוקאאוט אחד להצגה.</div>'}
+    ${showThirdPlace ? thirdPlaceHTML() : ''}
+  </div>`;
+}
+
 function render(){
   renderGroupSelect();
   renderStageSelect();
@@ -777,7 +986,8 @@ function render(){
   else if(view==='results') renderResults();
   else if(view==='upcoming') renderUpcoming();
   else if(view==='team') renderTeamView();
-  else renderScorers();
+  else if(view==='scorers') renderScorers();
+  else renderBracketView();
 }
 
 document.querySelectorAll('#mainNav button').forEach(btn=>{
